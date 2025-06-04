@@ -3,13 +3,14 @@ package com.drag.foreignnationals.etranger.dto;
 
 import lombok.*;
 
+import java.util.List;
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AddressDto {
+public class AddressDTO {
 
     private Long id;
 
@@ -18,7 +19,7 @@ public class AddressDto {
     private String zipCode;
 
     private boolean current;
-    private PersonDTO personDTO;
-    private CommuneDto communeDto;
+    private List<PersonDTO> persons;
+    private CommuneDTO commune;
 
 }

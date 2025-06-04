@@ -17,7 +17,7 @@ public class PersonDTO {
     private LocalDate dateOfBirth;
     private Gender gender;
     private NationalityDTO nationality;
-    private ResidencePermitDTO residencePermit;
-    private SituationDTO situationDTO;
-    private List<AddressDto> addresses;
+    private List<ResidencePermitDTO> residencePermits;
+    private SituationDTO situation;
+    private List<AddressDTO> addresses;
 }

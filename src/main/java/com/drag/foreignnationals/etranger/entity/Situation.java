@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
@@ -25,6 +26,6 @@ public class Situation {
 
     private String comment;
 
-    @OneToOne(mappedBy = "situation")
-    private Person person;
+    @OneToMany(mappedBy = "situation")
+    private List<Person> persons;
 }

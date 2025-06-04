@@ -28,20 +28,19 @@ public class Person {
         MALE, FEMALE
     }
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "nationality_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "nationality_id")
     private Nationality nationality;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "residence_permit_id", referencedColumnName = "id")
-    private ResidencePermit residencePermit;
-
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResidencePermit> residencePermits;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "situation_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "situation_id")
     private Situation situation;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
 
 
 }

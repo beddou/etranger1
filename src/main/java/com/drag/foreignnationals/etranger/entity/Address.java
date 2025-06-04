@@ -25,7 +25,7 @@ public class Address {
     @JoinColumn(name = "person_id")
     private Person person;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "commune_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "commune_id")
     private Commune commune;
 }

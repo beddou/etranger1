@@ -3,6 +3,8 @@ package com.drag.foreignnationals.etranger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -16,6 +18,6 @@ public class Nationality {
     private String country;
     private String countryAr;
 
-    @OneToOne(mappedBy = "nationality")
-    private Person person;
+    @OneToMany(mappedBy = "nationality", orphanRemoval = true)
+    private List<Person> persons;
 }

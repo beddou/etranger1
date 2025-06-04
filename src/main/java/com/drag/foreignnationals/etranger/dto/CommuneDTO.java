@@ -1,7 +1,5 @@
 package com.drag.foreignnationals.etranger.dto;
 
-import com.drag.foreignnationals.etranger.entity.Address;
-import jakarta.persistence.OneToOne;
 import lombok.*;
 
 
@@ -9,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CommuneDto {
+public class CommuneDTO {
 
     private Long id;
 
@@ -17,5 +15,5 @@ public class CommuneDto {
     private String nameAr;
     private String code;
 
-    private AddressDto addressDto;
+    private AddressDTO address;
 }

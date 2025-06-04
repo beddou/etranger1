@@ -12,4 +12,5 @@ public class ResidencePermitDTO {
     private Long id;
     private LocalDate dateOfIssue;
     private int durationInMonths;
+    private PersonDTO person;
 }

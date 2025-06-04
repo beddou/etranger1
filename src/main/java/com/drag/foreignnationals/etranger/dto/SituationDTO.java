@@ -14,4 +14,5 @@ public class SituationDTO {
     private SituationType type;
     private LocalDate date;
     private String comment;
+    private PersonDTO person;
 }

@@ -3,6 +3,8 @@ package com.drag.foreignnationals.etranger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,6 +20,6 @@ public class Commune {
     private String nameAr;
     private String code;
 
-    @OneToOne(mappedBy = "commune")
-    private Address address;
+    @OneToMany(mappedBy = "commune", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
 }
