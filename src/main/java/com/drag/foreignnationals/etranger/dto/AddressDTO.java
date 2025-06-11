@@ -19,7 +19,7 @@ public class AddressDTO {
     private String zipCode;
 
     private boolean current;
-    private List<PersonDTO> persons;
+    private PersonDTO person;
     private CommuneDTO commune;
 
 }

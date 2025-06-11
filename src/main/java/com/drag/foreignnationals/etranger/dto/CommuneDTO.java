@@ -2,6 +2,8 @@ package com.drag.foreignnationals.etranger.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -15,5 +17,5 @@ public class CommuneDTO {
     private String nameAr;
     private String code;
 
-    private AddressDTO address;
+    private List<AddressDTO> addresses;
 }
