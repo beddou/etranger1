@@ -1,6 +1,7 @@
 package com.drag.foreignnationals.etranger.dto;
 
-import com.drag.foreignnationals.etranger.entity.Person.Gender;
+
+import com.drag.foreignnationals.etranger.entity.Person;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,9 +16,11 @@ public class PersonDTO {
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
-    private Gender gender;
+    private Person.Gender gender;
     private NationalityDTO nationality;
     private List<ResidencePermitDTO> residencePermits;
     private SituationDTO situation;
     private List<AddressDTO> addresses;
+
+
 }

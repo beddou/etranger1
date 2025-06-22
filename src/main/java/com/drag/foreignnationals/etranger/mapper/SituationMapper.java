@@ -2,25 +2,14 @@ package com.drag.foreignnationals.etranger.mapper;
 
 import com.drag.foreignnationals.etranger.dto.SituationDTO;
 import com.drag.foreignnationals.etranger.entity.Situation;
+import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SituationMapper {
-    public SituationDTO toDTO(Situation entity) {
-        return SituationDTO.builder()
-                .id(entity.getId())
-                .type(entity.getType())
-                .date(entity.getDate())
-                .comment(entity.getComment())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface SituationMapper {
 
-    public Situation toEntity(SituationDTO dto) {
-        return Situation.builder()
-                .id(dto.getId())
-                .type(dto.getType())
-                .date(dto.getDate())
-                .comment(dto.getComment())
-                .build();
-    }
+    public SituationDTO toDTO(Situation entity);
+
+    public Situation toEntity(SituationDTO dto);
 }

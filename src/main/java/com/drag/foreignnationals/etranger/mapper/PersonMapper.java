@@ -1,13 +1,10 @@
 package com.drag.foreignnationals.etranger.mapper;
 
-import com.drag.foreignnationals.etranger.dto.NationalityDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.entity.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 @Component
 @Mapper(componentModel = "spring", uses = {ResidencePermitMapper.class, AddressMapper.class})

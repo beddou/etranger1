@@ -2,23 +2,17 @@ package com.drag.foreignnationals.etranger.mapper;
 
 import com.drag.foreignnationals.etranger.dto.NationalityDTO;
 import com.drag.foreignnationals.etranger.entity.Nationality;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NationalityMapper {
-    public NationalityDTO toDTO(Nationality entity) {
-        return NationalityDTO.builder()
-                .id(entity.getId())
-                .country(entity.getCountry())
-                .countryAr(entity.getCountryAr())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface NationalityMapper {
 
-    public Nationality toEntity(NationalityDTO dto) {
-        return Nationality.builder()
-                .id(dto.getId())
-                .country(dto.getCountry())
-                .countryAr(dto.getCountryAr())
-                .build();
-    }
+    @Mapping(target = "persons", ignore = true)
+    NationalityDTO toDTO(Nationality entity) ;
+
+    @Mapping(target = "persons", ignore = true)
+    Nationality toEntity(NationalityDTO dto);
 }
