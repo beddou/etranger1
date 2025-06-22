@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Mapper(componentModel = "spring")
 public interface SituationMapper {
 
-    public SituationDTO toDTO(Situation entity);
+    SituationDTO toDTO(Situation entity);
 
-    public Situation toEntity(SituationDTO dto);
+    Situation toEntity(SituationDTO dto);
 }
