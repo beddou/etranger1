@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 @Component
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CommuneMapper.class})
 public interface AddressMapper {
 
     AddressDTO toDTO(Address entity);

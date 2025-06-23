@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 @Component
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PersonMapper.class})
 public interface ResidencePermitMapper {
     ResidencePermitDTO toDTO(ResidencePermit entity);
     ResidencePermit toEntity(ResidencePermitDTO dto);
