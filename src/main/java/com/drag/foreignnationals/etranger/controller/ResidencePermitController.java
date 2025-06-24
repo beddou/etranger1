@@ -1,8 +1,12 @@
 package com.drag.foreignnationals.etranger.controller;
 
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
+import com.drag.foreignnationals.etranger.entity.Person;
+import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
+import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,31 +17,36 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResidencePermitController {
 
-    private final ResidencePermitService service;
+    @Autowired
+    private ResidencePermitService residencePermitService;
+    @Autowired
+    private PersonRepository personRepository;
 
-    @PostMapping
-    public ResponseEntity<ResidencePermitDTO> create(@RequestBody ResidencePermitDTO dto) {
-        return ResponseEntity.ok(service.create(dto));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ResidencePermitDTO> get(@PathVariable Long id) {
-        return ResponseEntity.ok(service.get(id));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ResidencePermitDTO>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    @PostMapping("/person/{personId}")
+    public ResponseEntity<ResidencePermitDTO> create(@PathVariable Long personId, @RequestBody ResidencePermitDTO dto) {
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
+        return ResponseEntity.ok(residencePermitService.create(person, dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ResidencePermitDTO> update(@PathVariable Long id, @RequestBody ResidencePermitDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        return ResponseEntity.ok(residencePermitService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+        residencePermitService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/person/{personId}")
+    public ResponseEntity<List<ResidencePermitDTO>> getByPerson(@PathVariable Long personId) {
+        return ResponseEntity.ok(residencePermitService.getByPersonId(personId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResidencePermitDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(residencePermitService.getById(id));
     }
 }
