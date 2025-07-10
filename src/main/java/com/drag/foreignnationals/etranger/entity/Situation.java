@@ -3,6 +3,7 @@ package com.drag.foreignnationals.etranger.entity;
 
 import com.drag.foreignnationals.etranger.enums.SituationType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -19,9 +20,13 @@ public class Situation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private SituationType type;
 
+    @NotNull
+    @Column(nullable = false)
     private LocalDate date;
 
     private String comment;

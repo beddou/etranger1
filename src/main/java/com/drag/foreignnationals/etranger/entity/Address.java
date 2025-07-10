@@ -2,6 +2,7 @@ package com.drag.foreignnationals.etranger.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -21,10 +22,14 @@ public class Address {
 
     private boolean current;
 
+    @NotNull
+    @Column(nullable = false)
     @ManyToOne
     @JoinColumn(name = "person_id")
     private Person person;
 
+    @NotNull
+    @Column(nullable = false)
     @ManyToOne
     @JoinColumn(name = "commune_id")
     private Commune commune;

@@ -1,6 +1,7 @@
 package com.drag.foreignnationals.etranger.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -16,18 +17,32 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String Name;
+
+    @NotNull
+    @Column(nullable = false)
     private String firstName;
+
+    @NotNull
+    @Column(nullable = false)
     private String lastName;
 
+    @NotNull
+    @Column(nullable = false)
     private LocalDate dateOfBirth;
 
+    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
 
     public enum Gender {
         MALE, FEMALE
     }
 
+    @NotNull
+    @Column(nullable = false)
     @ManyToOne
     @JoinColumn(name = "nationality_id")
     private Nationality nationality;

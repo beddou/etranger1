@@ -1,6 +1,7 @@
 package com.drag.foreignnationals.etranger.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -15,7 +16,11 @@ public class Nationality {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Column(nullable = false)
     private String country;
+    @NotNull
+    @Column(nullable = false)
     private String countryAr;
 
     @OneToMany(mappedBy = "nationality", orphanRemoval = true)
