@@ -31,6 +31,7 @@ public class Situation {
 
     private String comment;
 
-    @OneToMany(mappedBy = "situation")
+    @OneToOne
+    @JoinColumn(name = "person_id", referencedColumnName = "id", unique = true)
     private List<Person> persons;
 }

@@ -15,11 +15,6 @@ public class SituationController {
 
     private final SituationService service;
 
-    @PostMapping
-    public ResponseEntity<SituationDTO> create(@RequestBody SituationDTO dto) {
-        return ResponseEntity.ok(service.create(dto));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<SituationDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(service.get(id));
@@ -30,14 +25,5 @@ public class SituationController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SituationDTO> update(@PathVariable Long id, @RequestBody SituationDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
-    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
 }

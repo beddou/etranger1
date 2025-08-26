@@ -1,5 +1,7 @@
 package com.drag.foreignnationals.etranger.entity;
 
+import com.drag.foreignnationals.etranger.enums.ResidenceType;
+import com.drag.foreignnationals.etranger.enums.SituationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -19,7 +21,8 @@ public class ResidencePermit {
 
     @NotNull
     @Column(nullable = false)
-    private String permitType;
+    @Enumerated(EnumType.STRING)
+    private ResidenceType type;
 
     @NotNull
     @Column(nullable = false)
@@ -28,6 +31,8 @@ public class ResidencePermit {
     @NotNull
     @Column(nullable = false)
     private int durationInMonths;
+
+
 
     @NotNull
     @Column(nullable = false)

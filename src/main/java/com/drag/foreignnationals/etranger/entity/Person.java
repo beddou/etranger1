@@ -48,8 +48,8 @@ public class Person {
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResidencePermit> residencePermits;
 
-    @ManyToOne
-    @JoinColumn(name = "situation_id")
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+
     private Situation situation;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -15,12 +15,7 @@ public class NationalityController {
 
     private final NationalityService service;
 
-    @PostMapping
-    public ResponseEntity<NationalityDTO> create(@RequestBody NationalityDTO dto) {
-        return ResponseEntity.ok(service.create(dto));
-    }
-
-    @GetMapping("/{id}")
+      @GetMapping("/{id}")
     public ResponseEntity<NationalityDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(service.get(id));
     }
@@ -30,14 +25,5 @@ public class NationalityController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<NationalityDTO> update(@PathVariable Long id, @RequestBody NationalityDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
-    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
 }
