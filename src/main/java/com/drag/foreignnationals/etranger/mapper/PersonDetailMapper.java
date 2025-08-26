@@ -13,8 +13,14 @@ import org.mapstruct.MappingTarget;
 import org.springframework.stereotype.Component;
 
 @Component
-@Mapper(componentModel = "spring", uses = {ResidencePermitMapper.class, AddressMapper.class,
-        SituationMapper.class, NationalityMapper.class})
+@Mapper(componentModel = "spring",
+        uses = {
+                ResidencePermitMapper.class,
+                AddressMapper.class,
+                SituationMapper.class,
+                NationalityMapper.class
+                }
+      )
 public interface PersonDetailMapper {
 
     // --- Entity → DTO ---

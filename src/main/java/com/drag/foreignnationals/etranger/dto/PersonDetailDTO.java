@@ -6,6 +6,15 @@ import com.drag.foreignnationals.etranger.enums.ResidenceType;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.persistence.Entity;
+import lombok.*;
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
 public class PersonDetailDTO {
 
     private String firstName;
