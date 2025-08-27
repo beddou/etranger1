@@ -33,5 +33,5 @@ public class Situation {
 
     @OneToOne
     @JoinColumn(name = "person_id", referencedColumnName = "id", unique = true)
-    private List<Person> persons;
+    private Person person;
 }

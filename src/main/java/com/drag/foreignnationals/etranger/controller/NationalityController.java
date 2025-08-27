@@ -15,10 +15,7 @@ public class NationalityController {
 
     private final NationalityService service;
 
-      @GetMapping("/{id}")
-    public ResponseEntity<NationalityDTO> get(@PathVariable Long id) {
-        return ResponseEntity.ok(service.get(id));
-    }
+
 
     @GetMapping
     public ResponseEntity<List<NationalityDTO>> getAll() {

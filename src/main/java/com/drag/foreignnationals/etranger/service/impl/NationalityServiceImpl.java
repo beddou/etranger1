@@ -7,6 +7,7 @@ import com.drag.foreignnationals.etranger.mapper.NationalityMapper;
 import com.drag.foreignnationals.etranger.repository.NationalityRepository;
 import com.drag.foreignnationals.etranger.service.NationalityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +17,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NationalityServiceImpl implements NationalityService {
 
-    private final NationalityRepository repository;
-    private final NationalityMapper mapper;
+    @Autowired
+    private NationalityRepository repository;
 
-
+    @Autowired
+    private NationalityMapper mapper;
 
     @Override
     public List<NationalityDTO> getAll() {

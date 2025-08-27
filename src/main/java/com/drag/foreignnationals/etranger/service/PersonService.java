@@ -1,13 +1,14 @@
 package com.drag.foreignnationals.etranger.service;
 
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
+import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 
 import java.util.List;
 
 public interface PersonService {
-    PersonDTO createPerson(PersonDTO dto);
-    PersonDTO getPerson(Long id);
+    PersonDetailDTO createPerson(PersonDetailDTO dto);
+    PersonDetailDTO getPerson(Long id);
     List<PersonDTO> getAllPersons();
-    PersonDTO updatePerson(Long id, PersonDTO dto);
+    PersonDetailDTO updatePerson(Long id, PersonDetailDTO dto);
     void deletePerson(Long id);
 }

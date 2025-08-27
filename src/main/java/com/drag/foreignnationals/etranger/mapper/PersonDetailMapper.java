@@ -33,8 +33,6 @@ public interface PersonDetailMapper {
     @Mapping(target = "residencePermits", ignore = true) // same here
     Person toPerson(PersonDetailDTO dto);
 
-    Address toAddress(PersonDetailDTO dto);
-    ResidencePermit toResidencePermit(PersonDetailDTO dto);
 
 
 
