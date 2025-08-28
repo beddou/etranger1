@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -54,6 +55,19 @@ public class Person {
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses;
+
+    public Address getCurrentAddress() {
+        return addresses.stream()
+                .filter(Address::isCurrent)              // assuming you have a boolean flag
+                .findFirst() //
+                .orElse(null);
+    }
+
+    public ResidencePermit getLastResidencePermit() {
+        return residencePermits.stream()
+                .max(Comparator.comparing(ResidencePermit::getDateOfIssue)) // or expiryDate
+                .orElse(null);
+    }
 
 
 }

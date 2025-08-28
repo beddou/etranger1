@@ -7,9 +7,7 @@ import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
 import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,6 +30,16 @@ public interface PersonDetailMapper {
     @Mapping(target = "addresses", ignore = true) // we only map one address, not the list
     @Mapping(target = "residencePermits", ignore = true) // same here
     Person toPerson(PersonDetailDTO dto);
+
+    @Mapping(target = "addresses", ignore = true) // we only map one address, not the list
+    @Mapping(target = "residencePermits", ignore = true) // same here
+    PersonDTO toPersonDTO(PersonDetailDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updatePersonFromPersonDetailDto(PersonDetailDTO dto, @MappingTarget Person entity);
+
+
+
 
 
 

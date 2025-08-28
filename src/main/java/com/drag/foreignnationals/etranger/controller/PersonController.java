@@ -1,6 +1,7 @@
 package com.drag.foreignnationals.etranger.controller;
 
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
+import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +17,19 @@ public class PersonController {
     private final PersonService personService;
 
     @PostMapping
-    public ResponseEntity<PersonDTO> create(@RequestBody PersonDTO dto) {
+    public ResponseEntity<PersonDetailDTO> create(@RequestBody PersonDetailDTO dto) {
         return ResponseEntity.ok(personService.createPerson(dto));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDTO> get(@PathVariable Long id) {
+    public ResponseEntity<PersonDetailDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(personService.getPerson(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<PersonDTO>> getAll() {
-        return ResponseEntity.ok(personService.getAllPersons());
-    }
+
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> update(@PathVariable Long id, @RequestBody PersonDTO dto) {
+    public ResponseEntity<PersonDetailDTO> update(@PathVariable Long id, @RequestBody PersonDetailDTO dto) {
         return ResponseEntity.ok(personService.updatePerson(id, dto));
     }
 

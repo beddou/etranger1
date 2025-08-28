@@ -33,4 +33,6 @@ public class Address {
     @ManyToOne
     @JoinColumn(name = "commune_id")
     private Commune commune;
+
+
 }

@@ -1,5 +1,6 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
+import com.drag.foreignnationals.etranger.dto.AddressDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
@@ -15,6 +16,8 @@ import com.drag.foreignnationals.etranger.repository.AddressRepository;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import com.drag.foreignnationals.etranger.service.PersonService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,28 +92,71 @@ public class PersonServiceImpl implements PersonService {
         return personDetailMapper.toPersonDetailDto(person, currentAddress, lastPermit);
     }
 
-    @Override
+    /*@Override
     public List<PersonDTO> getAllPersons() {
         return personRepository.findAll()
                 .stream()
                 .map(personMapper::toDTO)
                 .collect(Collectors.toList());
-    }
+    }*/
 
     @Override
-    public PersonDetailDTO updatePerson(Long id, PersonDetailDTO dto) {
 
-        Address address = new Address();
+    @Transactional
+    public PersonDetailDTO updatePerson(Long personId, PersonDetailDTO dto) {
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
+
+        // Update Person scalar fields
+        personDetailMapper.updatePersonFromPersonDetailDto(dto, person);
+
+        // --- Update current address ---
+        if (dto.getCurrentAddress() != null) {
+            Address current = person.getCurrentAddress();
+            if (current == null) {
+                Address newAddress = addressMapper.toEntity(dto.getCurrentAddress());
+                newAddress.setPerson(person);
+                person.getAddresses().add(newAddress);
+            } else {
+                addressMapper.updateAddressFromDto(dto.getCurrentAddress(), current);
+            }
+        }
+
+        // --- Update last residence permit ---
+        if (dto.getLastResidencePermit() != null) {
+            ResidencePermit last = person.getLastResidencePermit();
+            if (last == null) {
+                ResidencePermit newPermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
+                newPermit.setPerson(person);
+                person.getResidencePermits().add(newPermit);
+            } else {
+                residencePermitMapper.updateResidencePermitFromDto(dto.getLastResidencePermit(), last);
+            }
+        }
+
+
+        person = personRepository.save(person);
+
+        return personDetailMapper.toPersonDetailDto(person, person.getCurrentAddress(),
+                person.getLastResidencePermit());
+
+    }
+    /*public PersonDetailDTO updatePerson(Long id, PersonDetailDTO dto) {
+
+
+
+        PersonDTO personDTO = personDetailMapper.toPersonDTO(dto);
+        Optional<AddressDTO> addressDTO = Optional.ofNullable(dto.getCurrentAddress());
         ResidencePermit residencePermit = new ResidencePermit();
         Person existing = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID " + id));
-        existing.setFirstName(dto.getFirstName());
-        existing.setLastName(dto.getLastName());
-        existing.setDateOfBirth(dto.getDateOfBirth());
-        existing.setGender(dto.getGender());
+        personMapper.updatePersonFromDto(personDTO,existing);
+
         existing = personRepository.save(existing);
 
         if (dto.getCurrentAddress() != null) {
+            address = addressRepository.findById(dto.getCurrentAddress().getId());
+            if (address.isPresent())
             address = addressMapper.toEntity(dto.getCurrentAddress());
             address.setPerson(existing);
             addressRepository.save(address);
@@ -123,7 +170,10 @@ public class PersonServiceImpl implements PersonService {
         }
 
         return personDetailMapper.toPersonDetailDto(personRepository.save(existing));
-    }
+
+
+
+    }*/
 
     @Override
     public void deletePerson(Long id) {
