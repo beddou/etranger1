@@ -2,7 +2,6 @@ package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.SituationDTO;
 import com.drag.foreignnationals.etranger.entity.Situation;
-import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
 import com.drag.foreignnationals.etranger.mapper.SituationMapper;
 import com.drag.foreignnationals.etranger.repository.SituationRepository;
 import com.drag.foreignnationals.etranger.service.SituationService;

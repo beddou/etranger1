@@ -1,8 +1,6 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.NationalityDTO;
-import com.drag.foreignnationals.etranger.entity.Nationality;
-import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
 import com.drag.foreignnationals.etranger.mapper.NationalityMapper;
 import com.drag.foreignnationals.etranger.repository.NationalityRepository;
 import com.drag.foreignnationals.etranger.service.NationalityService;

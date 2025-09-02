@@ -1,8 +1,6 @@
 package com.drag.foreignnationals.etranger.controller;
 
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
-import com.drag.foreignnationals.etranger.entity.Person;
-import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +21,9 @@ public class ResidencePermitController {
     private PersonRepository personRepository;
 
     @PostMapping("/person/{personId}")
-    public ResponseEntity<ResidencePermitDTO> create(@PathVariable Long personId, @RequestBody ResidencePermitDTO dto) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
-        return ResponseEntity.ok(residencePermitService.create(person, dto));
+    public ResponseEntity<ResidencePermitDTO> create( @RequestBody ResidencePermitDTO dto) {
+
+        return ResponseEntity.ok(residencePermitService.create( dto));
     }
 
     @PutMapping("/{id}")

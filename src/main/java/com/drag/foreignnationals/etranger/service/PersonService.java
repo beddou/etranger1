@@ -6,9 +6,9 @@ import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import java.util.List;
 
 public interface PersonService {
-    PersonDetailDTO createPerson(PersonDetailDTO dto);
-    PersonDetailDTO getPerson(Long id);
-
-    PersonDetailDTO updatePerson(Long id, PersonDetailDTO dto);
-    void deletePerson(Long id);
+    PersonDetailDTO create(PersonDetailDTO dto);
+    PersonDetailDTO get(Long id);
+    List<PersonDTO> search(String name);
+    PersonDetailDTO update(Long id, PersonDetailDTO dto);
+    void delete(Long id);
 }

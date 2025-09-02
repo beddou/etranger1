@@ -3,7 +3,6 @@ package com.drag.foreignnationals.etranger.service.impl;
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
-import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
 import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
@@ -27,10 +26,16 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
     ResidencePermitMapper permitMapper;
 
 
-    public ResidencePermitDTO create(Person person, ResidencePermitDTO dto) {
+    public ResidencePermitDTO create(ResidencePermitDTO dto) {
         ResidencePermit permit = permitMapper.toEntity(dto);
-        permit.setPerson(person);
-        return permitMapper.toDTO(permitRepository.save(permit));
+        long id = dto.getPerson().getId();
+        if (id>0){
+            Person person = personRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID " + id));
+            permit.setPerson(person);
+            return permitMapper.toDTO(permitRepository.save(permit));
+        }else throw new ResourceNotFoundException("Person not found");
+
     }
 
 

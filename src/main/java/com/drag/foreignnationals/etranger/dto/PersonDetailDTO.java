@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 
@@ -17,7 +18,10 @@ import lombok.*;
 
 public class PersonDetailDTO {
 
+    @NotBlank(message = "Firstname must not be blank")
     private String firstName;
+
+    @NotBlank(message = "Lastname must not be blank")
     private String lastName;
     private LocalDate dateOfBirth;
     private Person.Gender gender;

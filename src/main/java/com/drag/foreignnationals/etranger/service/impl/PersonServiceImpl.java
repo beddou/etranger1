@@ -1,13 +1,10 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
-import com.drag.foreignnationals.etranger.dto.AddressDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
-import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
 import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
-import com.drag.foreignnationals.etranger.exception.ResourceNotFoundException;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonDetailMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
@@ -22,10 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +43,8 @@ public class PersonServiceImpl implements PersonService {
     ResidencePermitMapper residencePermitMapper;
 
     @Override
-    public PersonDetailDTO createPerson(PersonDetailDTO dto) {
+    @Transactional
+    public PersonDetailDTO create(PersonDetailDTO dto) {
 
         Address address = new Address();
         ResidencePermit residencePermit = new ResidencePermit();
@@ -76,9 +72,9 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public PersonDetailDTO getPerson(Long id) {
+    public PersonDetailDTO get(Long id) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Person not found with ID " + id));
         // --- Pre-process current address ---
         Address currentAddress = person.getAddresses().stream()
                 .filter(Address::isCurrent)              // assuming you have a boolean flag
@@ -92,18 +88,22 @@ public class PersonServiceImpl implements PersonService {
         return personDetailMapper.toPersonDetailDto(person, currentAddress, lastPermit);
     }
 
-    /*@Override
-    public List<PersonDTO> getAllPersons() {
-        return personRepository.findAll()
+    @Override
+    @Transactional
+    public List<PersonDTO> search(String keyword){
+        return personRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(keyword, keyword)
                 .stream()
                 .map(personMapper::toDTO)
                 .collect(Collectors.toList());
-    }*/
+
+    }
+
+
 
     @Override
 
     @Transactional
-    public PersonDetailDTO updatePerson(Long personId, PersonDetailDTO dto) {
+    public PersonDetailDTO update(Long personId, PersonDetailDTO dto) {
         Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
@@ -141,44 +141,13 @@ public class PersonServiceImpl implements PersonService {
                 person.getLastResidencePermit());
 
     }
-    /*public PersonDetailDTO updatePerson(Long id, PersonDetailDTO dto) {
 
-
-
-        PersonDTO personDTO = personDetailMapper.toPersonDTO(dto);
-        Optional<AddressDTO> addressDTO = Optional.ofNullable(dto.getCurrentAddress());
-        ResidencePermit residencePermit = new ResidencePermit();
-        Person existing = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID " + id));
-        personMapper.updatePersonFromDto(personDTO,existing);
-
-        existing = personRepository.save(existing);
-
-        if (dto.getCurrentAddress() != null) {
-            address = addressRepository.findById(dto.getCurrentAddress().getId());
-            if (address.isPresent())
-            address = addressMapper.toEntity(dto.getCurrentAddress());
-            address.setPerson(existing);
-            addressRepository.save(address);
-        }
-
-        if (dto.getLastResidencePermit() != null){
-            residencePermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
-            residencePermit.setPerson(existing);
-            residencePermitRepository.save(residencePermit);
-
-        }
-
-        return personDetailMapper.toPersonDetailDto(personRepository.save(existing));
-
-
-
-    }*/
 
     @Override
-    public void deletePerson(Long id) {
+    @Transactional
+    public void delete(Long id) {
         if (!personRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Person not found with ID " + id);
+            throw new EntityNotFoundException("Person not found with ID " + id);
         }
         personRepository.deleteById(id);
     }

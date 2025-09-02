@@ -6,7 +6,7 @@ import com.drag.foreignnationals.etranger.entity.Person;
 import java.util.List;
 
 public interface ResidencePermitService {
-    ResidencePermitDTO create(Person person, ResidencePermitDTO dto);
+    ResidencePermitDTO create( ResidencePermitDTO dto);
     ResidencePermitDTO update(Long id, ResidencePermitDTO dto);
     void delete(Long id);
     List<ResidencePermitDTO> getByPersonId(Long personId);
