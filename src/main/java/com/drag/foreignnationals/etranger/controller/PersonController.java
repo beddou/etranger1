@@ -2,6 +2,8 @@ package com.drag.foreignnationals.etranger.controller;
 
 
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
+import com.drag.foreignnationals.etranger.exception.BusinessException;
+import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,9 @@ public class PersonController {
             PersonDetailDTO person = personService.create(dto);
             return new ResponseEntity<>(person, HttpStatus.CREATED);
         } catch (Exception e) {
-            throw new NoEntityAddedException(assuranceNotSaved);
+            throw new BusinessException(ErrorCode.Entity_NOT_REGISTERED,personNotSaved);
         }
-        return ResponseEntity.ok(personService.create(dto));
+        return ResponseEntity.ok( personService.create(dto));
     }
 
     @GetMapping("/{id}")
