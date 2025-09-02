@@ -7,6 +7,7 @@ import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,17 +32,17 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
         long id = dto.getPerson().getId();
         if (id>0){
             Person person = personRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID " + id));
+                    .orElseThrow(() -> new EntityNotFoundException("Person not found with ID " + id));
             permit.setPerson(person);
             return permitMapper.toDTO(permitRepository.save(permit));
-        }else throw new ResourceNotFoundException("Person not found");
+        }else throw new EntityNotFoundException("Person not found");
 
     }
 
 
     public ResidencePermitDTO update(Long id, ResidencePermitDTO dto) {
         ResidencePermit existing = permitRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Residence permit not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Residence permit not found"));
 
 
         existing.setDateOfIssue(dto.getDateOfIssue());
@@ -53,7 +54,7 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
     public void delete(Long id) {
         if (!permitRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Residence permit not found");
+            throw new EntityNotFoundException("Residence permit not found");
         }
         permitRepository.deleteById(id);
     }
@@ -61,7 +62,7 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
     public List<ResidencePermitDTO> getByPersonId(Long personId) {
         Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
         return person.getResidencePermits().stream()
                 .map(permitMapper::toDTO)
@@ -71,7 +72,7 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
     public ResidencePermitDTO getById(Long id) {
         ResidencePermit permit = permitRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Residence permit not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Residence permit not found"));
         return permitMapper.toDTO(permit);
     }
 }
