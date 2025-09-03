@@ -5,6 +5,8 @@ import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
+import com.drag.foreignnationals.etranger.exception.BusinessException;
+import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonDetailMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
@@ -17,7 +19,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -50,31 +54,49 @@ public class PersonServiceImpl implements PersonService {
         ResidencePermit residencePermit = new ResidencePermit();
         Person person = personDetailMapper.toPerson(dto);
 
-        person = personRepository.save(person);
-        if (dto.getCurrentAddress() != null) {
-            address = addressMapper.toEntity(dto.getCurrentAddress());
-            address.setPerson(person);
-            addressRepository.save(address);
-        }
+        try {
+            person = personRepository.save(person);
+            if (dto.getCurrentAddress() != null) {
+                address = addressMapper.toEntity(dto.getCurrentAddress());
+                address.setPerson(person);
+                addressRepository.save(address);
+            }
 
-        if (dto.getLastResidencePermit() != null){
-            residencePermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
-            residencePermit.setPerson(person);
-            residencePermitRepository.save(residencePermit);
+            if (dto.getLastResidencePermit() != null){
+                residencePermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
+                residencePermit.setPerson(person);
+                residencePermitRepository.save(residencePermit);
 
-        }
+            }
 
-        return personDetailMapper.toPersonDetailDto(person, address, residencePermit);
+            return personDetailMapper.toPersonDetailDto(person, address, residencePermit);
+        } catch (DataIntegrityViolationException ex) {
+        // Example: permit number unique violation or null not allowed
+        throw new BusinessException(
+                ErrorCode.BUSINESS_RULE_VIOLATION,
+                "Integrity error while saving person or nested objects."
+        );
 
+    } catch (TransactionSystemException ex) {
+        // Example: JPA validation (@NotNull, @Size, etc.)
+        throw new BusinessException(
+                ErrorCode.VALIDATION_ERROR,
+                "Validation failed for person or nested entities."
+        );
 
-
-
+    } catch (Exception ex) {
+        // Fallback: unexpected error
+        throw new BusinessException(
+                ErrorCode.INTERNAL_ERROR,
+                "Unexpected error while saving person detail: " + ex.getMessage()
+        );
     }
+}
 
     @Override
     public PersonDetailDTO get(Long id) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Person not found with ID " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
         // --- Pre-process current address ---
         Address currentAddress = person.getAddresses().stream()
                 .filter(Address::isCurrent)              // assuming you have a boolean flag
@@ -103,9 +125,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
 
     @Transactional
-    public PersonDetailDTO update(Long personId, PersonDetailDTO dto) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
+    public PersonDetailDTO update(Long id, PersonDetailDTO dto) {
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
 
         // Update Person scalar fields
         personDetailMapper.updatePersonFromPersonDetailDto(dto, person);
