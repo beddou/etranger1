@@ -5,9 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,7 +19,7 @@ public class Address {
     private String city;
     private String zipCode;
 
-    private boolean current;
+    private boolean isCurrent;
 
     @NotNull
     @Column(nullable = false)

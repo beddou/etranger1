@@ -1,26 +1,25 @@
 package com.drag.foreignnationals.etranger.dto;
 
-
 import com.drag.foreignnationals.etranger.entity.Person;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonDTO {
-    private Long id;
+public class PersonCreateDTO {
+
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
     private Person.Gender gender;
-    private String nationalityName;
+    private Long nationalityId;
 
-    private String situationName;
-
-
-
+    private Long situationId;
+    private AddressCreateDto currentAddress;
 }

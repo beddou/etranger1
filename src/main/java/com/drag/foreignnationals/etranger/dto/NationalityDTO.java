@@ -12,5 +12,5 @@ public class NationalityDTO {
     private Long id;
     private String country;
     private String countryAr;
-    private List<PersonDTO> persons;
+
 }

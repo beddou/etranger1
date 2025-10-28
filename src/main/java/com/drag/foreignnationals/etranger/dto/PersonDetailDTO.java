@@ -18,6 +18,7 @@ import lombok.*;
 
 public class PersonDetailDTO {
 
+    private Long id;
     @NotBlank(message = "Firstname must not be blank")
     private String firstName;
 

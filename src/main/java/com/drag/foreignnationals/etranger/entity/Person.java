@@ -8,12 +8,11 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

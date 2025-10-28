@@ -17,5 +17,5 @@ public class CommuneDTO {
     private String nameAr;
     private String code;
 
-    private List<AddressDTO> addresses;
+
 }

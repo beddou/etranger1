@@ -1,12 +1,15 @@
 package com.drag.foreignnationals.etranger.controller;
 
 
+import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.service.PersonService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +21,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PersonController {
 
+
     private final PersonService personService;
-    private String personNotSaved = "Person not saved";
-    private String personNotFound = "Person not found";
+
 
     @PostMapping
-    public ResponseEntity<PersonDetailDTO> create(@RequestBody PersonDetailDTO dto) {
-        try {
-            PersonDetailDTO person = personService.create(dto);
-            return new ResponseEntity<>(person, HttpStatus.CREATED);
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.Entity_NOT_REGISTERED,personNotSaved);
-        }
-        return ResponseEntity.ok( personService.create(dto));
+    public ResponseEntity<PersonDetailDTO> create(@Valid @RequestBody PersonCreateDTO dto) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(personService.create(dto));
+
     }
 
     @GetMapping("/{id}")
@@ -38,10 +37,8 @@ public class PersonController {
         return ResponseEntity.ok(personService.get(id));
     }
 
-
-
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDetailDTO> update(@PathVariable Long id, @RequestBody PersonDetailDTO dto) {
+    public ResponseEntity<PersonDetailDTO> update(@Valid @PathVariable Long id, @RequestBody PersonCreateDTO dto) {
         return ResponseEntity.ok(personService.update(id, dto));
     }
 

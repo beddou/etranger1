@@ -1,19 +1,19 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
+import com.drag.foreignnationals.etranger.dto.AddressCreateDto;
+import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.entity.Address;
+import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
-import com.drag.foreignnationals.etranger.mapper.PersonDetailMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
 import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
-import com.drag.foreignnationals.etranger.repository.AddressRepository;
-import com.drag.foreignnationals.etranger.repository.PersonRepository;
-import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
+import com.drag.foreignnationals.etranger.repository.*;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -36,7 +36,7 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     PersonMapper personMapper;
     @Autowired
-    PersonDetailMapper personDetailMapper;
+    PersonMapper personDetailMapper;
     @Autowired
     ResidencePermitRepository residencePermitRepository;
     @Autowired
@@ -45,69 +45,66 @@ public class PersonServiceImpl implements PersonService {
     AddressRepository addressRepository;
     @Autowired
     ResidencePermitMapper residencePermitMapper;
+    @Autowired
+    NationalityRepository nationalityRepository;
+    @Autowired
+    SituationRepository situationRepository;
+    @Autowired
+    CommuneRepository communeRepository;
 
     @Override
     @Transactional
-    public PersonDetailDTO create(PersonDetailDTO dto) {
+    public PersonDetailDTO create(PersonCreateDTO dto) {
 
-        Address address = new Address();
-        ResidencePermit residencePermit = new ResidencePermit();
-        Person person = personDetailMapper.toPerson(dto);
+        // 1. map basic fields
+        Person person = personMapper.toEntity(dto);
 
-        try {
-            person = personRepository.save(person);
+            // 2. set nationality (required)
+            Nationality nat = nationalityRepository.findById(dto.getNationalityId())
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.ENTITY_NOT_FOUND, "Nationality not found"));
+            person.setNationality(nat);
+
+            // 3. set situation if provided (optional)
+            if (dto.getSituationId() != null) {
+                situationRepository.findById(dto.getSituationId())
+                        .ifPresent(person::setSituation);
+            }
+
+            // 5. handle current address (if provided)
             if (dto.getCurrentAddress() != null) {
-                address = addressMapper.toEntity(dto.getCurrentAddress());
+                Address address = addressMapper.toEntity(dto.getCurrentAddress());
+                // set commune if provided
+                if (dto.getCurrentAddress().getCommuneId() != null) {
+                    communeRepository.findById(dto.getCurrentAddress().getCommuneId())
+                            .ifPresent(address::setCommune);
+                }
+                // set relationships
                 address.setPerson(person);
-                addressRepository.save(address);
-            }
+                address.setCurrent(true);
 
-            if (dto.getLastResidencePermit() != null){
-                residencePermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
-                residencePermit.setPerson(person);
-                residencePermitRepository.save(residencePermit);
+                // ensure person.addresses contains it
+                person.getAddresses().add(address);// cascade saves it later
 
             }
 
-            return personDetailMapper.toPersonDetailDto(person, address, residencePermit);
-        } catch (DataIntegrityViolationException ex) {
-        // Example: permit number unique violation or null not allowed
-        throw new BusinessException(
-                ErrorCode.BUSINESS_RULE_VIOLATION,
-                "Integrity error while saving person or nested objects."
-        );
+            // 5. Persist everything in one transaction
+            Person savedPerson = personRepository.save(person);
 
-    } catch (TransactionSystemException ex) {
-        // Example: JPA validation (@NotNull, @Size, etc.)
-        throw new BusinessException(
-                ErrorCode.VALIDATION_ERROR,
-                "Validation failed for person or nested entities."
-        );
+            // return detail dto
+            return personMapper.toPersonDetailDto(savedPerson);
 
-    } catch (Exception ex) {
-        // Fallback: unexpected error
-        throw new BusinessException(
-                ErrorCode.INTERNAL_ERROR,
-                "Unexpected error while saving person detail: " + ex.getMessage()
-        );
-    }
+
+
+
 }
 
     @Override
     public PersonDetailDTO get(Long id) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
-        // --- Pre-process current address ---
-        Address currentAddress = person.getAddresses().stream()
-                .filter(Address::isCurrent)              // assuming you have a boolean flag
-                .findFirst()
-                .orElse(null);
 
-        // --- Pre-process last residence permit ---
-        ResidencePermit lastPermit = person.getResidencePermits().stream()
-                .max(Comparator.comparing(ResidencePermit::getDateOfIssue)) // latest by issueDate
-                .orElse(null);
-        return personDetailMapper.toPersonDetailDto(person, currentAddress, lastPermit);
+        return personDetailMapper.toPersonDetailDto(person);
     }
 
     @Override
@@ -115,7 +112,7 @@ public class PersonServiceImpl implements PersonService {
     public List<PersonDTO> search(String keyword){
         return personRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(keyword, keyword)
                 .stream()
-                .map(personMapper::toDTO)
+                .map(personMapper::toPersonDto)
                 .collect(Collectors.toList());
 
     }
@@ -125,42 +122,35 @@ public class PersonServiceImpl implements PersonService {
     @Override
 
     @Transactional
-    public PersonDetailDTO update(Long id, PersonDetailDTO dto) {
+    public PersonDetailDTO update(Long id, PersonCreateDTO dto) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
 
         // Update Person scalar fields
-        personDetailMapper.updatePersonFromPersonDetailDto(dto, person);
+        personDetailMapper.updateEntityFromDto(dto, person);
+
+        // update nationality if provided
+        if (dto.getNationalityId() != null) {
+            Nationality nat = nationalityRepository.findById(dto.getNationalityId())
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.ENTITY_NOT_FOUND, "Nationality not found"));
+            person.setNationality(nat);
+        }
+
+        // update situation if provided
+        if (dto.getSituationId() != null) {
+            situationRepository.findById(dto.getSituationId())
+                    .ifPresent(person::setSituation);
+        }
 
         // --- Update current address ---
         if (dto.getCurrentAddress() != null) {
-            Address current = person.getCurrentAddress();
-            if (current == null) {
-                Address newAddress = addressMapper.toEntity(dto.getCurrentAddress());
-                newAddress.setPerson(person);
-                person.getAddresses().add(newAddress);
-            } else {
-                addressMapper.updateAddressFromDto(dto.getCurrentAddress(), current);
-            }
+            updateCurrentAddress(person, dto.getCurrentAddress());
         }
-
-        // --- Update last residence permit ---
-        if (dto.getLastResidencePermit() != null) {
-            ResidencePermit last = person.getLastResidencePermit();
-            if (last == null) {
-                ResidencePermit newPermit = residencePermitMapper.toEntity(dto.getLastResidencePermit());
-                newPermit.setPerson(person);
-                person.getResidencePermits().add(newPermit);
-            } else {
-                residencePermitMapper.updateResidencePermitFromDto(dto.getLastResidencePermit(), last);
-            }
-        }
-
 
         person = personRepository.save(person);
 
-        return personDetailMapper.toPersonDetailDto(person, person.getCurrentAddress(),
-                person.getLastResidencePermit());
+        return personDetailMapper.toPersonDetailDto(person);
 
     }
 
@@ -172,5 +162,33 @@ public class PersonServiceImpl implements PersonService {
             throw new EntityNotFoundException("Person not found with ID " + id);
         }
         personRepository.deleteById(id);
+    }
+
+
+    //*****************************************
+    ///  set current address
+    private void updateCurrentAddress(Person person, AddressCreateDto addressDTO) {
+
+        // Get current active address
+        Address currentAddress = person.getCurrentAddress();
+
+        if (currentAddress == null) {
+            // No address yet → create new
+            currentAddress = addressMapper.toEntity(addressDTO);
+            currentAddress.setPerson(person);
+            person.getAddresses().add(currentAddress);
+        } else {
+            // Update existing current address
+            addressMapper.updateAddressFromDto(addressDTO, currentAddress);
+        }
+
+        // Update commune if provided
+        if (addressDTO.getCommuneId() != null) {
+            communeRepository.findById(addressDTO.getCommuneId())
+                    .ifPresent(currentAddress::setCommune);
+        }
+
+        currentAddress.setCurrent(true);
+        addressRepository.save(currentAddress);
     }
 }

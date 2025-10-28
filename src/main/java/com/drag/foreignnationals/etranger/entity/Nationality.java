@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.util.List;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,10 +17,10 @@ public class Nationality {
 
     @NotNull
     @Column(nullable = false)
-    private String country;
+    private String name;
     @NotNull
     @Column(nullable = false)
-    private String countryAr;
+    private String nameAr;
 
     @OneToMany(mappedBy = "nationality", orphanRemoval = true)
     private List<Person> persons;
