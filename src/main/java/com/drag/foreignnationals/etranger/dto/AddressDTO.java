@@ -19,7 +19,7 @@ public class AddressDTO {
     private String city;
     private String zipCode;
 
-    private boolean isCurrent;
+    private boolean current;
 
     private CommuneDTO commune;
 

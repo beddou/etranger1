@@ -13,5 +13,6 @@ public interface NationalityMapper {
 
     NationalityDTO toDTO(Nationality entity) ;
 
+    @Mapping(target = "persons", ignore = true)
     Nationality toEntity(NationalityDTO dto);
 }

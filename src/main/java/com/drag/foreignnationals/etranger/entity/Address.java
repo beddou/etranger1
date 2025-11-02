@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,18 +20,16 @@ public class Address {
     private String city;
     private String zipCode;
 
-    private boolean isCurrent;
+    private boolean current;
 
     @NotNull
-    @Column(nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "person_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
     private Person person;
 
     @NotNull
-    @Column(nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "commune_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "commune_id", nullable = false)
     private Commune commune;
 
 

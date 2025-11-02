@@ -14,7 +14,7 @@ public interface CommuneMapper {
 
     CommuneDTO toDTO(Commune entity) ;
 
-
+    @Mapping(target = "addresses", ignore = true)
     Commune toEntity(CommuneDTO dto);
 
 }

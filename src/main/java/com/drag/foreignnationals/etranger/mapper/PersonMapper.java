@@ -20,7 +20,7 @@ public interface PersonMapper {
 
     // light list/read mapping
     @Mapping(target = "nationalityName", source = "nationality.name")
-    @Mapping(target = "situationName", source = "situation.SituationType")
+    @Mapping(target = "situationName", source = "situation.type")
     PersonDTO toPersonDto(Person person);
 
     // detailed mapping (entity -> PersonDetailDto)
@@ -35,7 +35,7 @@ public interface PersonMapper {
     Person toEntity(PersonCreateDTO dto);
 
     // Update existing entity from update DTO (null properties ignored)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+   // @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "nationality", ignore = true)
     @Mapping(target = "situation", ignore = true)

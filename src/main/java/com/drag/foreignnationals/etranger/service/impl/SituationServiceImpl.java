@@ -2,6 +2,8 @@ package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.SituationDTO;
 import com.drag.foreignnationals.etranger.entity.Situation;
+import com.drag.foreignnationals.etranger.exception.BusinessException;
+import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.SituationMapper;
 import com.drag.foreignnationals.etranger.repository.SituationRepository;
 import com.drag.foreignnationals.etranger.service.SituationService;
@@ -26,7 +28,8 @@ public class SituationServiceImpl implements SituationService {
     @Override
     public SituationDTO get(Long id) {
         Situation entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Situation not found"));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND, "Situation not found"));
         return mapper.toDTO(entity);
     }
 
@@ -40,7 +43,9 @@ public class SituationServiceImpl implements SituationService {
     @Override
     public SituationDTO update(Long id, SituationDTO dto) {
         Situation entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Situation not found"));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND, "Situation not found"));
+
         entity.setType(dto.getType());
         entity.setDate(dto.getDate());
         entity.setComment(dto.getComment());
@@ -50,7 +55,8 @@ public class SituationServiceImpl implements SituationService {
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Situation not found");
+            throw new BusinessException(
+                    ErrorCode.ENTITY_NOT_FOUND, "Situation not found");
         }
         repository.deleteById(id);
     }

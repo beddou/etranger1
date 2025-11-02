@@ -14,13 +14,16 @@ public interface AddressMapper {
 
     AddressDTO toDTO(Address entity);
 
-
-    //Address toEntity(AddressDTO dto);
-
+    @Mapping(target = "person", ignore = true)
+    @Mapping(target = "current", ignore = true)
+    @Mapping(target = "commune", ignore = true)
+    @Mapping(target = "id", ignore = true)
     Address toEntity(AddressCreateDto dto);
 
-    // Updates existing entity instead of creating a new one
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "person", ignore = true)
+    @Mapping(target = "current", ignore = true)
+    @Mapping(target = "commune", ignore = true)
+    @Mapping(target = "id", ignore = true)
     void updateAddressFromDto(AddressCreateDto dto, @MappingTarget Address entity);
 
 

@@ -10,13 +10,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper(componentModel = "spring", uses = {PersonMapper.class})
 public interface ResidencePermitMapper {
+
+    @Mapping(target = "personId", ignore = true)
     ResidencePermitDTO toDTO(ResidencePermit entity);
 
-
+    @Mapping(target = "person", ignore = true)
     ResidencePermit toEntity(ResidencePermitDTO dto);
 
-    // Updates existing entity instead of creating a new one
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "person", ignore = true)
     void updateResidencePermitFromDto(ResidencePermitDTO dto, @MappingTarget ResidencePermit entity);
 
 }

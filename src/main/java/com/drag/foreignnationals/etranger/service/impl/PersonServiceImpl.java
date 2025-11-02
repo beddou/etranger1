@@ -1,13 +1,9 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
-import com.drag.foreignnationals.etranger.dto.AddressCreateDto;
-import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
+import com.drag.foreignnationals.etranger.dto.*;
 import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
-import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
@@ -16,14 +12,15 @@ import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
 import com.drag.foreignnationals.etranger.repository.*;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +48,25 @@ public class PersonServiceImpl implements PersonService {
     SituationRepository situationRepository;
     @Autowired
     CommuneRepository communeRepository;
+
+
+    @Transactional(readOnly = true)
+    public Page<PersonDTO> search(String keyword, int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Person> personPage;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            personPage = personRepository.findAll(pageable);
+        } else {
+            personPage = personRepository.search(keyword.trim(), pageable);
+        }
+
+        return personPage.map(personDetailMapper::toPersonDto);
+    }
 
     @Override
     @Transactional
@@ -153,6 +169,46 @@ public class PersonServiceImpl implements PersonService {
         return personDetailMapper.toPersonDetailDto(person);
 
     }
+
+    @Transactional
+    public PersonDetailDTO patch(Long id, PersonPatchDTO dto) {
+
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "Person not found with ID " + id
+                ));
+
+        // 1. Scalar fields
+        dto.getFirstName().ifPresent(person::setFirstName);
+        dto.getLastName().ifPresent(person::setLastName);
+        dto.getDateOfBirth().ifPresent(person::setDateOfBirth);
+        dto.getGender().ifPresent(person::setGender);
+
+        // 2. Nationality
+        dto.getNationalityId().ifPresent(natId -> {
+            Nationality nat = nationalityRepository.findById(natId)
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.ENTITY_NOT_FOUND,
+                            "Nationality not found with ID " + natId
+                    ));
+            person.setNationality(nat);
+        });
+
+        // 3. Situation
+        dto.getSituationId().ifPresent(sitId ->
+                situationRepository.findById(sitId).ifPresent(person::setSituation)
+        );
+
+        // 4. Current address
+        dto.getCurrentAddress().ifPresent(addressDTO ->
+                updateCurrentAddress(person, addressDTO)
+        );
+
+        Person saved = personRepository.save(person);
+        return personDetailMapper.toPersonDetailDto(saved);
+    }
+
 
 
     @Override

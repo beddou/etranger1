@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 public class NationalityDTO {
     private Long id;
-    private String country;
-    private String countryAr;
+    private String name;
+    private String nameAr;
 
 }

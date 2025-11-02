@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,10 +41,10 @@ public class Person {
         MALE, FEMALE
     }
 
+
     @NotNull
-    @Column(nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "nationality_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "nationality_id", nullable = false)
     private Nationality nationality;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)

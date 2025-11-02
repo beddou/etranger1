@@ -36,8 +36,7 @@ public class ResidencePermit {
 
 
     @NotNull
-    @Column(nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "person_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
     private Person person;
 }

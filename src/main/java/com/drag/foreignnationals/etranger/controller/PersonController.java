@@ -2,7 +2,9 @@ package com.drag.foreignnationals.etranger.controller;
 
 
 import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
+import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
+import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.service.PersonService;
@@ -10,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,19 @@ public class PersonController {
     private final PersonService personService;
 
 
+    @GetMapping
+    public ResponseEntity<Page<PersonDTO>> getAll(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "lastName") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Page<PersonDTO> result = personService.search(keyword, page, size, sortBy, direction);
+        return ResponseEntity.ok(result);
+    }
+
+
     @PostMapping
     public ResponseEntity<PersonDetailDTO> create(@Valid @RequestBody PersonCreateDTO dto) {
 
@@ -38,9 +54,17 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDetailDTO> update(@Valid @PathVariable Long id, @RequestBody PersonCreateDTO dto) {
+    public ResponseEntity<PersonDetailDTO> update(@Valid @PathVariable Long id, @Valid @RequestBody PersonCreateDTO dto) {
         return ResponseEntity.ok(personService.update(id, dto));
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<PersonDetailDTO> patch(
+            @PathVariable Long id,
+            @Valid @RequestBody PersonPatchDTO dto) {
+        return ResponseEntity.ok(personService.patch(id, dto));
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

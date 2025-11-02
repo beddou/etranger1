@@ -12,6 +12,6 @@ public interface SituationMapper {
 
     SituationDTO toDTO(Situation entity);
 
-
+    @Mapping(target = "person", ignore = true)
     Situation toEntity(SituationDTO dto);
 }
