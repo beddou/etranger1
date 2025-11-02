@@ -6,7 +6,7 @@ import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
+
 
 public interface PersonService {
     Page<PersonDTO> search(String keyword, int page, int size, String sortBy, String direction);

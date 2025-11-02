@@ -8,7 +8,7 @@ import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
-import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
+
 import com.drag.foreignnationals.etranger.repository.*;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,8 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
