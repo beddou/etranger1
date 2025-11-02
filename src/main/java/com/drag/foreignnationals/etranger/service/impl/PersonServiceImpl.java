@@ -35,13 +35,9 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     PersonMapper personDetailMapper;
     @Autowired
-    ResidencePermitRepository residencePermitRepository;
-    @Autowired
     AddressMapper addressMapper;
     @Autowired
     AddressRepository addressRepository;
-    @Autowired
-    ResidencePermitMapper residencePermitMapper;
     @Autowired
     NationalityRepository nationalityRepository;
     @Autowired
@@ -50,6 +46,7 @@ public class PersonServiceImpl implements PersonService {
     CommuneRepository communeRepository;
 
 
+    @Override
     @Transactional(readOnly = true)
     public Page<PersonDTO> search(String keyword, int page, int size, String sortBy, String direction) {
         Sort sort = direction.equalsIgnoreCase("desc")
@@ -124,18 +121,6 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @Transactional
-    public List<PersonDTO> search(String keyword){
-        return personRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(keyword, keyword)
-                .stream()
-                .map(personMapper::toPersonDto)
-                .collect(Collectors.toList());
-
-    }
-
-
-
-    @Override
 
     @Transactional
     public PersonDetailDTO update(Long id, PersonCreateDTO dto) {
@@ -196,9 +181,12 @@ public class PersonServiceImpl implements PersonService {
         });
 
         // 3. Situation
-        dto.getSituationId().ifPresent(sitId ->
+        dto.getSituationId()
+                .flatMap(situationRepository::findById)
+                .ifPresent(person::setSituation);
+        /*dto.getSituationId().ifPresent(sitId ->
                 situationRepository.findById(sitId).ifPresent(person::setSituation)
-        );
+        );*/
 
         // 4. Current address
         dto.getCurrentAddress().ifPresent(addressDTO ->

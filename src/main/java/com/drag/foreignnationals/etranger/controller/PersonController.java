@@ -5,13 +5,12 @@ import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
-import com.drag.foreignnationals.etranger.exception.BusinessException;
-import com.drag.foreignnationals.etranger.exception.ErrorCode;
+
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

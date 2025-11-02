@@ -1,7 +1,6 @@
 package com.drag.foreignnationals.etranger.entity;
 
 import com.drag.foreignnationals.etranger.enums.ResidenceType;
-import com.drag.foreignnationals.etranger.enums.SituationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

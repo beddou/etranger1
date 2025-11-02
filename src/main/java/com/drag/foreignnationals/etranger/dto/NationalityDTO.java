@@ -2,7 +2,7 @@ package com.drag.foreignnationals.etranger.dto;
 
 import lombok.*;
 
-import java.util.List;
+
 
 @Data
 @NoArgsConstructor

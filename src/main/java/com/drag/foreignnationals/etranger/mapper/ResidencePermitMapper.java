@@ -1,8 +1,8 @@
 package com.drag.foreignnationals.etranger.mapper;
 
-import com.drag.foreignnationals.etranger.dto.PersonDTO;
+
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
-import com.drag.foreignnationals.etranger.entity.Person;
+
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;

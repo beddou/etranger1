@@ -9,14 +9,14 @@ import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
-import jakarta.persistence.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -77,10 +77,6 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
 
     public List<ResidencePermitDTO> getByPersonId(Long personId) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() ->  new BusinessException(
-                ErrorCode.ENTITY_NOT_FOUND,
-                "Person not found with ID " + personId ));
 
         return permitRepository.findByPersonId(personId).stream()
                 .map(permitMapper::toDTO)
