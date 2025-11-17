@@ -112,11 +112,12 @@ public class PersonServiceImpl implements PersonService {
 }
 
     @Override
-    public PersonDetailDTO get(Long id) {
+    @Transactional(readOnly = true)
+    public PersonDetailDTO getById(Long id) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
 
-        return personDetailMapper.toPersonDetailDto(person);
+        return personMapper.toPersonDetailDto(person);
     }
 
     @Override

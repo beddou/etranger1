@@ -24,8 +24,8 @@ public class NationalityServiceImpl implements NationalityService {
     @Override
     public List<NationalityDTO> getAll() {
         return repository.findAll().stream()
-                .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .map(mapper::toDTO).toList();
+
     }
 
 }

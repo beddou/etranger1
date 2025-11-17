@@ -15,10 +15,9 @@ public class NationalityController {
 
     private final NationalityService service;
 
-
-
     @GetMapping
     public ResponseEntity<List<NationalityDTO>> getAll() {
+
         return ResponseEntity.ok(service.getAll());
     }
 

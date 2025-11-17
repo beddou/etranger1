@@ -29,7 +29,6 @@ public class CommuneServiceImpl implements CommuneService {
     @Override
     public List<CommuneDTO> getAll() {
         return repository.findAll().stream()
-                .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .map(mapper::toDTO).toList();
     }
 }

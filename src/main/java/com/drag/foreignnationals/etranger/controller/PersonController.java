@@ -49,7 +49,7 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDetailDTO> get(@PathVariable @Min(value = 1, message = "Id must be positive") Long id) {
-        return ResponseEntity.ok(personService.get(id));
+        return ResponseEntity.ok(personService.getById(id));
     }
 
     @PutMapping("/{id}")
