@@ -28,7 +28,7 @@ public class AddressServiceImpl {
     AddressRepository addressRepository;
 
     @Transactional
-    AddressDTO add(Long idPerson, AddressCreateDto dto) {
+    public AddressDTO add(Long idPerson, AddressCreateDto dto) {
 
         Person person = personRepository.findById(idPerson)
                 .orElseThrow(() -> new BusinessException(
@@ -42,6 +42,7 @@ public class AddressServiceImpl {
 
         if (currentAddress != null) {
             currentAddress.setCurrent(false);
+            addressRepository.save(currentAddress);
 
         }
         Address address = addressMapper.toEntity(dto);
@@ -54,7 +55,7 @@ public class AddressServiceImpl {
             );
         }
 
-        else {
+
             Commune commune = communeRepository.findById(dto.getCommuneId())
                     .orElseThrow(() -> new BusinessException(
                             ErrorCode.ENTITY_NOT_FOUND,
@@ -62,8 +63,7 @@ public class AddressServiceImpl {
                     ));
 
             address.setCommune(commune);
-        }
-
+        address.setPerson(person);
         address.setCurrent(true);
         return(addressMapper.toDTO(addressRepository.save(address))) ;
 

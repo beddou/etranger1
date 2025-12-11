@@ -7,5 +7,6 @@ public enum ErrorCode {
     CONSTRAINT_VIOLATION,
     INTERNAL_ERROR,
     DATABASE_ERROR,
+    INVALID_DATA,
 
 }

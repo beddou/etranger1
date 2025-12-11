@@ -2,6 +2,7 @@ package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.*;
 import com.drag.foreignnationals.etranger.entity.Address;
+import com.drag.foreignnationals.etranger.entity.Commune;
 import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -31,8 +32,7 @@ public class PersonServiceImpl implements PersonService {
     PersonRepository personRepository;
     @Autowired
     PersonMapper personMapper;
-    @Autowired
-    PersonMapper personDetailMapper;
+
     @Autowired
     AddressMapper addressMapper;
     @Autowired
@@ -61,7 +61,7 @@ public class PersonServiceImpl implements PersonService {
             personPage = personRepository.search(keyword.trim(), pageable);
         }
 
-        return personPage.map(personDetailMapper::toPersonDto);
+        return personPage.map(personMapper::toPersonDto);
     }
 
     @Override
@@ -84,14 +84,23 @@ public class PersonServiceImpl implements PersonService {
             }
 
             // 5. handle current address (if provided)
-            if (dto.getCurrentAddress() != null) {
-                Address address = addressMapper.toEntity(dto.getCurrentAddress());
-                // set commune if provided
-                if (dto.getCurrentAddress().getCommuneId() != null) {
-                    communeRepository.findById(dto.getCurrentAddress().getCommuneId())
-                            .ifPresent(address::setCommune);
-                }
+            // (mandatory commune if address exists)
+        if (dto.getCurrentAddress() != null) {
+
+            Address address = addressMapper.toEntity(dto.getCurrentAddress());
+
+            Long communeId = dto.getCurrentAddress().getCommuneId();
+
+            if (communeId == null) {
+                throw new BusinessException(
+                        ErrorCode.INVALID_DATA, "Commune is required when address is provided");
+            }
+
+            Commune commune = communeRepository.findById(communeId)
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.ENTITY_NOT_FOUND, "Commune not found"));
                 // set relationships
+            address.setCommune(commune);
                 address.setPerson(person);
                 address.setCurrent(true);
 
@@ -128,7 +137,7 @@ public class PersonServiceImpl implements PersonService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
 
         // Update Person scalar fields
-        personDetailMapper.updateEntityFromDto(dto, person);
+        personMapper.updateEntityFromDto(dto, person);
 
         // update nationality if provided
         if (dto.getNationalityId() != null) {
@@ -151,7 +160,7 @@ public class PersonServiceImpl implements PersonService {
 
         person = personRepository.save(person);
 
-        return personDetailMapper.toPersonDetailDto(person);
+        return personMapper.toPersonDetailDto(person);
 
     }
 
@@ -194,7 +203,7 @@ public class PersonServiceImpl implements PersonService {
         );
 
         Person saved = personRepository.save(person);
-        return personDetailMapper.toPersonDetailDto(saved);
+        return personMapper.toPersonDetailDto(saved);
     }
 
 

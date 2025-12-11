@@ -3,10 +3,9 @@ package com.drag.foreignnationals.etranger.service.person;
 
 
 
-import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
-import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
+import com.drag.foreignnationals.etranger.dto.*;
+import com.drag.foreignnationals.etranger.entity.Address;
+import com.drag.foreignnationals.etranger.entity.Commune;
 import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -14,13 +13,14 @@ import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
 import com.drag.foreignnationals.etranger.repository.*;
-import com.drag.foreignnationals.etranger.service.PersonService;
 import com.drag.foreignnationals.etranger.service.impl.PersonServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -48,16 +48,13 @@ class PersonServiceTest {
     private NationalityRepository nationalityRepository;
     @Mock
     private SituationRepository situationRepository;
-    @Mock
-    private AddressRepository addressRepository;
+
     @Mock
     private CommuneRepository communeRepository;
 
     // Mappers
     @Mock
     private PersonMapper personMapper;
-    @Mock
-    private PersonMapper personDetailMapper;  // you inject two!
     @Mock
     private AddressMapper addressMapper;
 
@@ -82,9 +79,12 @@ class PersonServiceTest {
         personDTO.setFirstName("John");
     }
 
-    // ----------------------------------------------------------
+    // ==========================================================
     // GET BY ID
-    // ----------------------------------------------------------
+    // ==========================================================
+    @Nested
+    class GetTests {
+
     @Test
     void getById_shouldReturnPersonDetailDto() {
         when(personRepository.findById(1L)).thenReturn(Optional.of(person));
@@ -108,10 +108,13 @@ class PersonServiceTest {
 
         assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
     }
+    }
 
-    // ----------------------------------------------------------
+    // ==========================================================
     // CREATE
-    // ----------------------------------------------------------
+    // ==========================================================
+    @Nested
+    class CreateTests {
     @Test
     void create_shouldCreatePerson() {
         PersonCreateDTO dto = new PersonCreateDTO();
@@ -142,9 +145,120 @@ class PersonServiceTest {
         assertThrows(BusinessException.class, () -> personService.create(dto));
     }
 
-    // ----------------------------------------------------------
+    @Test
+    void create_success_withValidCommune() {
+        // Arrange
+        PersonCreateDTO dto = new PersonCreateDTO();
+        dto.setNationalityId(1L);
+
+        AddressCreateDto addressDto = new AddressCreateDto();
+        addressDto.setCommuneId(10L);
+        dto.setCurrentAddress(addressDto);
+
+        Person person = new Person();
+        Address address = new Address();
+
+        Nationality nat = new Nationality();
+        Commune commune = new Commune();
+
+        Person saved = new Person();
+        PersonDetailDTO expectedDto = new PersonDetailDTO();
+
+        Mockito.when(personMapper.toEntity(dto)).thenReturn(person);
+        Mockito.when(nationalityRepository.findById(1L)).thenReturn(Optional.of(nat));
+        Mockito.when(addressMapper.toEntity(addressDto)).thenReturn(address);
+        Mockito.when(communeRepository.findById(10L)).thenReturn(Optional.of(commune));
+        Mockito.when(personRepository.save(person)).thenReturn(saved);
+        Mockito.when(personMapper.toPersonDetailDto(saved)).thenReturn(expectedDto);
+
+        // Act
+        PersonDetailDTO result = personService.create(dto);
+
+        // Assert
+        assertEquals(expectedDto, result);
+        assertSame(commune, address.getCommune());
+        assertSame(person, address.getPerson());
+
+        Mockito.verify(personRepository).save(person);
+    }
+
+    // ---------------------------
+    //      ERROR CASE 1:
+    //   CommuneId is NULL
+    // ---------------------------
+    @Test
+    void createPerson_error_missingCommuneId() {
+        // Arrange
+        PersonCreateDTO dto = new PersonCreateDTO();
+        dto.setNationalityId(1L);
+
+        AddressCreateDto addressDto = new AddressCreateDto();
+        addressDto.setCommuneId(null);
+        dto.setCurrentAddress(addressDto);
+
+        Person person = new Person();
+
+        Mockito.when(personMapper.toEntity(dto)).thenReturn(person);
+        Mockito.when(nationalityRepository.findById(1L))
+                .thenReturn(Optional.of(new Nationality()));
+
+        // Act + Assert
+        BusinessException ex = assertThrows(
+                BusinessException.class,
+                () -> personService.create(dto)
+        );
+
+        assertEquals(ErrorCode.INVALID_DATA, ex.getErrorCode());
+        assertEquals("Commune is required when address is provided", ex.getMessage());
+
+        Mockito.verify(personRepository, Mockito.never()).save(any());
+    }
+
+    // ---------------------------
+    //      ERROR CASE 2:
+    //   CommuneId incorrect
+    // ---------------------------
+    @Test
+    void createPerson_error_communeNotFound() {
+        // Arrange
+        PersonCreateDTO dto = new PersonCreateDTO();
+        dto.setNationalityId(1L);
+
+        AddressCreateDto addressDto = new AddressCreateDto();
+        addressDto.setCommuneId(999L); // unknown commune
+        dto.setCurrentAddress(addressDto);
+
+        Person person = new Person();
+
+        Mockito.when(personMapper.toEntity(dto)).thenReturn(person);
+        Mockito.when(nationalityRepository.findById(1L))
+                .thenReturn(Optional.of(new Nationality()));
+        Mockito.when(addressMapper.toEntity(addressDto))
+                .thenReturn(new Address());
+        Mockito.when(communeRepository.findById(999L))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        BusinessException ex = assertThrows(
+                BusinessException.class,
+                () -> personService.create(dto)
+        );
+
+        assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
+        assertEquals("Commune not found", ex.getMessage());
+
+        Mockito.verify(personRepository, Mockito.never()).save(any());
+
+}
+    }
+
+
+    // ==========================================================
     // UPDATE
-    // ----------------------------------------------------------
+    // ==========================================================
+    @Nested
+    class UpdateTests {
+
     @Test
     void update_shouldUpdatePerson() {
         PersonCreateDTO dto = new PersonCreateDTO();
@@ -156,7 +270,7 @@ class PersonServiceTest {
         when(personRepository.findById(1L)).thenReturn(Optional.of(person));
         when(nationalityRepository.findById(5L)).thenReturn(Optional.of(nat));
         when(personRepository.save(person)).thenReturn(person);
-        when(personDetailMapper.toPersonDetailDto(person)).thenReturn(personDetailDTO);
+        when(personMapper.toPersonDetailDto(person)).thenReturn(personDetailDTO);
 
         PersonDetailDTO result = personService.update(1L, dto);
 
@@ -169,18 +283,24 @@ class PersonServiceTest {
 
         assertThrows(BusinessException.class, () -> personService.update(1L, new PersonCreateDTO()));
     }
+    }
 
-    // ----------------------------------------------------------
-    // PATCH
-    // ----------------------------------------------------------
+
+        // ==========================================================
+        // PATCH
+        // ==========================================================
+        @Nested
+        class PatchTests {
+
     @Test
     void patch_shouldUpdateFields() {
         PersonPatchDTO dto = new PersonPatchDTO();
         dto.setFirstName(Optional.of("Ali"));
+        dto.setSituationId(Optional.empty()); // make sure it's empty
 
         when(personRepository.findById(1L)).thenReturn(Optional.of(person));
         when(personRepository.save(person)).thenReturn(person);
-        when(personDetailMapper.toPersonDetailDto(person)).thenReturn(personDetailDTO);
+        when(personMapper.toPersonDetailDto(person)).thenReturn(personDetailDTO);
 
         PersonDetailDTO result = personService.patch(1L, dto);
 
@@ -193,10 +313,15 @@ class PersonServiceTest {
         when(personRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(BusinessException.class, () -> personService.patch(1L, new PersonPatchDTO()));
     }
+        }
 
-    // ----------------------------------------------------------
-    // DELETE
-    // ----------------------------------------------------------
+
+            // ==========================================================
+            // DELETE
+            // ==========================================================
+            @Nested
+            class DeleteTests {
+
     @Test
     void delete_shouldRemovePerson() {
         when(personRepository.existsById(1L)).thenReturn(true);
@@ -212,10 +337,15 @@ class PersonServiceTest {
 
         assertThrows(Exception.class, () -> personService.delete(1L));
     }
+            }
 
-    // ----------------------------------------------------------
+    // ==========================================================
     // SEARCH
-    // ----------------------------------------------------------
+    // ==========================================================
+    @Nested
+    class SearchTests {
+
+
     @Test
     void search_shouldReturnPagedResults() {
         Page<Person> page = new PageImpl<>(List.of(person));
@@ -227,6 +357,7 @@ class PersonServiceTest {
 
         assertEquals(1, result.getTotalElements());
         assertEquals("John", result.getContent().get(0).getFirstName());
+    }
     }
 }
 

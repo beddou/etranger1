@@ -38,12 +38,13 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
                     "Person information is required to create a residence permit."
             );
         }
-        ResidencePermit permit = permitMapper.toEntity(dto);
+
         long personId = dto.getPersonId();
 
             Person person = personRepository.findById(personId)
                     .orElseThrow(() ->new BusinessException(
                             ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + personId));
+        ResidencePermit permit = permitMapper.toEntity(dto);
         permit.setPerson(person);
         ResidencePermit saved = permitRepository.save(permit);
             return permitMapper.toDTO(saved);
