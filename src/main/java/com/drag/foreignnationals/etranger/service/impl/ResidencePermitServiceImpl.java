@@ -1,6 +1,7 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
+import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -44,7 +45,17 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
             Person person = personRepository.findById(personId)
                     .orElseThrow(() ->new BusinessException(
                             ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + personId));
+
+
+        // Get active residence permit
+        ResidencePermit activeResidencePermit = person.getActiveResidencePermit();
+        if (activeResidencePermit != null) {
+            activeResidencePermit.setActive(false);
+            permitRepository.save(activeResidencePermit);
+        }
+
         ResidencePermit permit = permitMapper.toEntity(dto);
+        permit.setActive(true);
         permit.setPerson(person);
         ResidencePermit saved = permitRepository.save(permit);
             return permitMapper.toDTO(saved);

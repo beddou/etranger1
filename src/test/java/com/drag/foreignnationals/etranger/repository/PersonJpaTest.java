@@ -13,7 +13,6 @@ import jakarta.persistence.EntityManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 
-public class PersonRepositoryTest {
+public class PersonJpaTest {
     @Autowired
     private PersonRepository personRepository;
 
@@ -45,7 +44,7 @@ public class PersonRepositoryTest {
     // -------------------------------------------------------
     @Test
     void shouldSavePersonWithNationality() {
-        Nationality nat = new Nationality(null, "Algerian","جزاءىري",null);
+        Nationality nat = new Nationality(null, "Algerian","جزائري",null);
 
         nat = nationalityRepository.save(nat);
 

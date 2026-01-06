@@ -2,7 +2,9 @@ package com.drag.foreignnationals.etranger.service.residencePermit;
 
 
 
+import com.drag.foreignnationals.etranger.dto.AddressDTO;
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
+import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -69,8 +71,11 @@ public class ResidencePermitTest  {
     @Nested
     class CreateTests {
 
+        // ----------------------------------------------------------
+        // SUCCESS CASE: No previous permit
+        // ----------------------------------------------------------
         @Test
-        void shouldCreateResidencePermitSuccessfully() {
+        void add_success_withoutPreviousPermit() {
             when(permitMapper.toEntity(permitDTO)).thenReturn(permit);
             when(personRepository.findById(1L)).thenReturn(Optional.of(person));
             when(permitRepository.save(permit)).thenReturn(permit);
@@ -85,6 +90,41 @@ public class ResidencePermitTest  {
             verify(personRepository).findById(1L);
             verify(permitRepository).save(permit);
             verify(permitMapper).toDTO(permit);
+        }
+
+        // ----------------------------------------------------------
+        // SUCCESS CASE: Previous permit exists → must deactivate
+        // ----------------------------------------------------------
+        @Test
+        void add_success_withPreviousPermit() {
+
+
+            ResidencePermit oldPermit = new ResidencePermit();
+            oldPermit.setActive(true);
+            oldPermit.setId(99L);
+            oldPermit.setPerson(person);
+            person.getResidencePermits().add(oldPermit);
+
+            when(permitMapper.toEntity(permitDTO)).thenReturn(permit);
+            when(personRepository.findById(1L)).thenReturn(Optional.of(person));
+            when(permitRepository.save(permit)).thenReturn(permit);
+            when(permitMapper.toDTO(permit)).thenReturn(permitDTO);
+
+
+
+            // Act
+            ResidencePermitDTO result = service.create(permitDTO);
+
+            // Assert
+            assertNotNull(result);
+            assertFalse(oldPermit.isActive());
+            assertSame(person, permit.getPerson());
+            assertTrue(permit.isActive());
+
+            verify(permitRepository).save(oldPermit); //previous permit must be updated
+            verify(permitRepository).save(permit);  // new permit saved
+
+
         }
 
         @Test

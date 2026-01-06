@@ -49,7 +49,7 @@ public class Person {
     private Nationality nationality;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ResidencePermit> residencePermits;
+    private List<ResidencePermit> residencePermits = new ArrayList<>();
 
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
 
@@ -68,6 +68,14 @@ public class Person {
     public ResidencePermit getLastResidencePermit() {
         return residencePermits.stream()
                 .max(Comparator.comparing(ResidencePermit::getDateOfIssue)) // or expiryDate
+                .orElse(null);
+    }
+
+
+    public ResidencePermit getActiveResidencePermit() {
+        return residencePermits.stream()
+                .filter(ResidencePermit::isActive)
+                .findFirst()
                 .orElse(null);
     }
 
