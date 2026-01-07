@@ -11,12 +11,17 @@ import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.repository.AddressRepository;
 import com.drag.foreignnationals.etranger.repository.CommuneRepository;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
+import com.drag.foreignnationals.etranger.service.AddressService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public class AddressServiceImpl {
+@Service
+@RequiredArgsConstructor
+public class AddressServiceImpl implements AddressService {
 
     @Autowired
     PersonRepository personRepository;
@@ -68,7 +73,7 @@ public class AddressServiceImpl {
         return(addressMapper.toDTO(addressRepository.save(address))) ;
 
 }
-    List<AddressDTO> getAllByPerson(Long idPerson) {
+    public List<AddressDTO> getAllByPerson(Long idPerson) {
 
         return addressRepository.findByPersonId(idPerson)
                 .stream().map(addressMapper::toDTO).toList();

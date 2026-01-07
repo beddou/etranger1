@@ -5,6 +5,7 @@ import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
 import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
 
 

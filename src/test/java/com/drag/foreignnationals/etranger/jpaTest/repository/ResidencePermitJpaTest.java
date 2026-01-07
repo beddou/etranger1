@@ -1,7 +1,10 @@
-package com.drag.foreignnationals.etranger.repository;
+package com.drag.foreignnationals.etranger.jpaTest.repository;
 
 import com.drag.foreignnationals.etranger.entity.*;
 import com.drag.foreignnationals.etranger.enums.ResidenceType;
+import com.drag.foreignnationals.etranger.repository.NationalityRepository;
+import com.drag.foreignnationals.etranger.repository.PersonRepository;
+import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,8 +102,7 @@ class ResidencePermitJpaTest {
                         .person(person)
                         .type(ResidenceType.Commerçant)
                         .build();
-        /*person.getResidencePermits().add(oldPermit);
-        person.getResidencePermits().add(activePermit);*/
+
         person.setResidencePermits(List.of(oldPermit, activePermit));
 
         personRepository.save(person);

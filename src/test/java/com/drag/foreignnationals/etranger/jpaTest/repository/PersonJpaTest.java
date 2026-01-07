@@ -1,7 +1,8 @@
-package com.drag.foreignnationals.etranger.repository;
+package com.drag.foreignnationals.etranger.jpaTest.repository;
 
 import com.drag.foreignnationals.etranger.entity.*;
 import com.drag.foreignnationals.etranger.enums.SituationType;
+import com.drag.foreignnationals.etranger.repository.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,7 +29,7 @@ public class PersonJpaTest {
     private NationalityRepository nationalityRepository;
 
     @Autowired
-    private  CommuneRepository communeRepository;
+    private CommuneRepository communeRepository;
 
     @Autowired
     private SituationRepository situationRepository;

@@ -49,6 +49,7 @@ public class Person {
     private Nationality nationality;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ResidencePermit> residencePermits = new ArrayList<>();
 
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,7 +57,9 @@ public class Person {
     private Situation situation;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Address> addresses= new ArrayList<>();
+
 
     public Address getCurrentAddress() {
         return addresses.stream()

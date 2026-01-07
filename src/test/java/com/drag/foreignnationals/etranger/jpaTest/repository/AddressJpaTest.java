@@ -1,7 +1,11 @@
-package com.drag.foreignnationals.etranger.repository;
+package com.drag.foreignnationals.etranger.jpaTest.repository;
 
 
 import com.drag.foreignnationals.etranger.entity.*;
+import com.drag.foreignnationals.etranger.repository.AddressRepository;
+import com.drag.foreignnationals.etranger.repository.CommuneRepository;
+import com.drag.foreignnationals.etranger.repository.NationalityRepository;
+import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
