@@ -68,8 +68,8 @@ public class AddressServiceImpl implements AddressService {
                     ));
 
             address.setCommune(commune);
-        address.setPerson(person);
         address.setCurrent(true);
+        person.addAddress(address);
         return(addressMapper.toDTO(addressRepository.save(address))) ;
 
 }

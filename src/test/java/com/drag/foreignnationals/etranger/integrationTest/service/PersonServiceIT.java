@@ -13,12 +13,11 @@ import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.repository.CommuneRepository;
 import com.drag.foreignnationals.etranger.repository.NationalityRepository;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
-import com.drag.foreignnationals.etranger.repository.SituationRepository;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -26,8 +25,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
-
 @Transactional
 class PersonServiceIT extends AbstractMySqlIT {
 
@@ -43,182 +40,220 @@ class PersonServiceIT extends AbstractMySqlIT {
     @Autowired
     private CommuneRepository communeRepository;
 
-    @Autowired
-    private SituationRepository situationRepository;
+    // ======================================================
+    // CREATE PERSON — POSITIVE FLOWS
+    // ======================================================
+    @Nested
+    class CreatePersonPositive {
 
+        @Test
+        void shouldCreatePersonSuccessfully() {
+            Nationality nat = createNationality();
+            PersonCreateDTO dto = basePersonDto(nat.getId());
 
-/*   TEST 1 — Create person (basic flow)
-Business rule tested :
-✔ Nationality is mandatory
-✔ Person is persisted    */
-@Test
-void shouldCreatePersonSuccessfully() {
-    // GIVEN
-    Nationality nat = createNationality();
-    PersonCreateDTO dto = basePersonDto(nat.getId());
+            PersonDetailDTO result = personService.create(dto);
 
-    // WHEN
-    PersonDetailDTO result = personService.create(dto);
+            assertThat(result.getId()).isNotNull();
+            assertThat(result.getFirstName()).isEqualTo("Karim");
+            assertThat(result.getNationality().getId()).isEqualTo(nat.getId());
+            assertThat(personRepository.existsById(result.getId())).isTrue();
+        }
 
-    // THEN
-    assertThat(result.getId()).isNotNull();
-    assertThat(result.getFirstName()).isEqualTo("Karim");
-    assertThat(result.getNationality().getId()).isEqualTo(nat.getId());
+        @Test
+        void shouldCreatePersonWithCurrentAddress() {
+            Nationality nat = createNationality();
+            Commune commune = createCommune();
 
-    assertThat(personRepository.existsById(result.getId())).isTrue();
-}
+            PersonCreateDTO dto = basePersonDto(nat.getId());
+            dto.setCurrentAddress(addressDto(commune.getId()));
 
-/*   TEST 2 — Create person WITH current address
-Business rule tested
+            PersonDetailDTO result = personService.create(dto);
 
-✔ Address is created
-✔ Address is current
-✔ Commune is mandatory  */
-@Test
-void shouldCreatePersonWithCurrentAddress() {
-    // GIVEN
-    Nationality nat = createNationality();
-    Commune commune = createCommune();
+            Person person =
+                    personRepository.findById(result.getId()).orElseThrow();
 
-    PersonCreateDTO dto = basePersonDto(nat.getId());
-    dto.setCurrentAddress(addressDto(commune.getId()));
+            Address current = person.getCurrentAddress();
+            assertThat(current).isNotNull();
+            assertThat(current.isCurrent()).isTrue();
+            assertThat(current.getCommune().getId()).isEqualTo(commune.getId());
+        }
+    }
 
-    // WHEN
-    PersonDetailDTO result = personService.create(dto);
+    // ======================================================
+    // CREATE PERSON — NEGATIVE FLOWS
+    // ======================================================
+    @Nested
+    class CreatePersonNegative {
 
-    // THEN
-    Person person = personRepository.findById(result.getId()).orElseThrow();
+        @Test
+        void shouldFail_whenAddressProvidedWithoutCommune() {
+            Nationality nat = createNationality();
+            PersonCreateDTO dto = basePersonDto(nat.getId());
 
-    Address current = person.getCurrentAddress();
-    assertThat(current).isNotNull();
-    assertThat(current.isCurrent()).isTrue();
-    assertThat(current.getCommune().getId()).isEqualTo(commune.getId());
-}
+            AddressCreateDto address = new AddressCreateDto();
+            address.setStreet("Street");
+            address.setCity("City");
+            dto.setCurrentAddress(address);
 
-/*   TEST 3 — Create person with address but NO commune → error
-Business rule tested
+            assertThatThrownBy(() -> personService.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("Commune is required");
 
-✔ Commune is mandatory when address exists   */
-@Test
-void shouldFailWhenAddressProvidedWithoutCommune() {
-    // GIVEN
-    Nationality nat = createNationality();
+            assertThat(personRepository.count()).isZero();
+        }
 
-    PersonCreateDTO dto = basePersonDto(nat.getId());
-    AddressCreateDto address = new AddressCreateDto();
-    address.setStreet("Street");
-    address.setCity("City");
-    dto.setCurrentAddress(address);
+        @Test
+        void shouldFail_whenNationalityNotFound() {
+            PersonCreateDTO dto = basePersonDto(999L);
 
-    // THEN
-    assertThatThrownBy(() -> personService.create(dto))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("Commune is required");
-}
+            assertThatThrownBy(() -> personService.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("Nationality not found");
+        }
+    }
 
-/*   TEST 4 — Update person (full update)
-Business rule tested
+    // ======================================================
+    // UPDATE PERSON — POSITIVE FLOWS
+    // ======================================================
+    @Nested
+    class UpdatePersonPositive {
 
-✔ Scalar fields updated
-✔ Nationality updated   */
-@Test
-void shouldUpdatePerson() {
-    // GIVEN
-    Nationality nat1 = createNationality();
-    Nationality nat2 = nationalityRepository.save(
-            new Nationality(null, "French", "فرنسي", null)
-    );
+        @Test
+        void shouldUpdatePerson() {
+            Nationality nat1 = createNationality();
+            Nationality nat2 = nationalityRepository.save(
+                    new Nationality(null, "French", "فرنسي", null)
+            );
 
-    PersonDetailDTO created =
-            personService.create(basePersonDto(nat1.getId()));
+            PersonDetailDTO created =
+                    personService.create(basePersonDto(nat1.getId()));
 
-    PersonCreateDTO updateDto = new PersonCreateDTO();
-    updateDto.setFirstName("Zinedine");
-    updateDto.setLastName("Zidane");
-    updateDto.setNationalityId(nat2.getId());
+            PersonCreateDTO updateDto = new PersonCreateDTO();
+            updateDto.setFirstName("Zinedine");
+            updateDto.setLastName("Zidane");
+            updateDto.setNationalityId(nat2.getId());
 
-    // WHEN
-    PersonDetailDTO updated =
-            personService.update(created.getId(), updateDto);
+            PersonDetailDTO updated =
+                    personService.update(created.getId(), updateDto);
 
-    // THEN
-    assertThat(updated.getFirstName()).isEqualTo("Zinedine");
-    assertThat(updated.getNationality().getId()).isEqualTo(nat2.getId());
-}
+            assertThat(updated.getFirstName()).isEqualTo("Zinedine");
+            assertThat(updated.getNationality().getId()).isEqualTo(nat2.getId());
+        }
 
-/*  TEST 5 — Patch person (partial update)
-Business rule tested
+        @Test
+        void shouldUpdateCurrentAddress() {
+            Nationality nat = createNationality();
+            Commune commune1 = createCommune();
+            Commune commune2 = communeRepository.save(
+                    new Commune(null, "Oran", "وهران", "3100", null)
+            );
 
-✔ Only provided fields are updated */
-@Test
-void shouldPatchPersonPartially() {
-    // GIVEN
-    Nationality nat = createNationality();
-    PersonDetailDTO created =
-            personService.create(basePersonDto(nat.getId()));
+            PersonCreateDTO dto = basePersonDto(nat.getId());
+            dto.setCurrentAddress(addressDto(commune1.getId()));
 
-    PersonPatchDTO patch = new PersonPatchDTO();
-    patch.setFirstName(Optional.of("Riyad"));
+            PersonDetailDTO created = personService.create(dto);
 
-    // WHEN
-    PersonDetailDTO patched =
-            personService.patch(created.getId(), patch);
+            PersonCreateDTO update = new PersonCreateDTO();
+            update.setCurrentAddress(addressDto(commune2.getId()));
 
-    // THEN
-    assertThat(patched.getFirstName()).isEqualTo("Riyad");
-    assertThat(patched.getLastName()).isEqualTo("Benzema"); // unchanged
-}
+            personService.update(created.getId(), update);
 
-/*   TEST 6 — Update current address (replace)
-Business rule tested
+            Person person =
+                    personRepository.findById(created.getId()).orElseThrow();
 
-✔ Only one current address
-✔ Address is updated, not duplicated  */
-@Test
-void shouldUpdateCurrentAddress() {
-    // GIVEN
-    Nationality nat = createNationality();
-    Commune commune1 = createCommune();
-    Commune commune2 = communeRepository.save(
-            new Commune(null, "Oran", "وهران", "3100", null)
-    );
+            Assertions.assertThat(person.getAddresses()).hasSize(1);
+            assertThat(person.getCurrentAddress().getCommune().getId())
+                    .isEqualTo(commune2.getId());
+        }
+    }
 
-    PersonCreateDTO dto = basePersonDto(nat.getId());
-    dto.setCurrentAddress(addressDto(commune1.getId()));
+    // ======================================================
+    // UPDATE / PATCH — NEGATIVE FLOWS
+    // ======================================================
+    @Nested
+    class UpdatePatchNegative {
 
-    PersonDetailDTO created = personService.create(dto);
+        @Test
+        void shouldFail_whenUpdatingNonExistingPerson() {
+            PersonCreateDTO dto = basePersonDto(createNationality().getId());
 
-    PersonCreateDTO update = new PersonCreateDTO();
-    update.setCurrentAddress(addressDto(commune2.getId()));
+            assertThatThrownBy(() -> personService.update(999L, dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("Person not found");
+        }
 
-    // WHEN
-    personService.update(created.getId(), update);
+        @Test
+        void shouldFail_whenPatchingNonExistingPerson() {
+            PersonPatchDTO patch = new PersonPatchDTO();
+            patch.setFirstName(Optional.of("Test"));
 
-    // THEN
-    Person person =
-            personRepository.findById(created.getId()).orElseThrow();
+            assertThatThrownBy(() -> personService.patch(999L, patch))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("Person not found");
+        }
 
-    Assertions.assertThat(person.getAddresses()).hasSize(1);
-    assertThat(person.getCurrentAddress().getCommune().getId())
-            .isEqualTo(commune2.getId());
-}
+        @Test
+        void shouldFailWhenUpdatingWithInvalidNationality() {
+            // GIVEN
+            Nationality nat = createNationality();
+            PersonDetailDTO created =
+                    personService.create(basePersonDto(nat.getId()));
 
-/*  TEST 7 — Get by id */
-@Test
-void shouldGetPersonById() {
-    Nationality nat = createNationality();
-    PersonDetailDTO created =
-            personService.create(basePersonDto(nat.getId()));
+            PersonCreateDTO update = new PersonCreateDTO();
+            update.setNationalityId(999L);
 
-    PersonDetailDTO found =
-            personService.getById(created.getId());
+            // WHEN + THEN
+            assertThatThrownBy(() -> personService.update(created.getId(), update))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("Nationality not found");
+        }
+    }
 
-    assertThat(found.getId()).isEqualTo(created.getId());
-}
+    // ======================================================
+    // PATCH PERSON — POSITIVE FLOWS
+    // ======================================================
+    @Nested
+    class PatchPersonPositive {
 
+        @Test
+        void shouldPatchPersonPartially() {
+            Nationality nat = createNationality();
+            PersonDetailDTO created =
+                    personService.create(basePersonDto(nat.getId()));
 
-    //*****************************
-    //**** Helper data creators****
+            PersonPatchDTO patch = new PersonPatchDTO();
+            patch.setFirstName(Optional.of("Riyad"));
+
+            PersonDetailDTO patched =
+                    personService.patch(created.getId(), patch);
+
+            assertThat(patched.getFirstName()).isEqualTo("Riyad");
+            assertThat(patched.getLastName()).isEqualTo("Benzema");
+        }
+    }
+
+    // ======================================================
+    // READ
+    // ======================================================
+    @Nested
+    class ReadPerson {
+
+        @Test
+        void shouldGetPersonById() {
+            Nationality nat = createNationality();
+            PersonDetailDTO created =
+                    personService.create(basePersonDto(nat.getId()));
+
+            PersonDetailDTO found =
+                    personService.getById(created.getId());
+
+            assertThat(found.getId()).isEqualTo(created.getId());
+        }
+    }
+
+    // ======================================================
+    // HELPERS
+    // ======================================================
     private Nationality createNationality() {
         return nationalityRepository.save(
                 new Nationality(null, "Algerian", "جزائري", null)
@@ -248,6 +283,5 @@ void shouldGetPersonById() {
         dto.setCommuneId(communeId);
         return dto;
     }
-
-
 }
+

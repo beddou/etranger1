@@ -10,15 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(
-        name = "address",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_person_current_address",
-                        columnNames = {"person_id", "current"}
-                )
-        }
-)
 public class Address {
 
     @Id

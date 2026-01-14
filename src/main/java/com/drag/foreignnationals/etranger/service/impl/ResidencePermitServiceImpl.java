@@ -11,6 +11,7 @@ import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,14 +57,14 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
         ResidencePermit permit = permitMapper.toEntity(dto);
         permit.setActive(true);
-        permit.setPerson(person);
+        person.addPermit(permit);
         ResidencePermit saved = permitRepository.save(permit);
             return permitMapper.toDTO(saved);
 
 
     }
 
-
+    @Transactional
     public ResidencePermitDTO update(Long id, ResidencePermitDTO dto) {
         ResidencePermit existing = permitRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
@@ -77,14 +78,17 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
         return permitMapper.toDTO(permitRepository.save(updated));
     }
 
-
+@Transactional
     public void delete(Long id) {
+
         ResidencePermit permit = permitRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.ENTITY_NOT_FOUND,
                         "Residence permit not found with ID " + id
                 ));
-        permitRepository.delete(permit);
+
+    permitRepository.delete(permit);
+
     }
 
 

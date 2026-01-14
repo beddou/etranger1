@@ -68,6 +68,16 @@ public class Person {
                 .orElse(null);
     }
 
+    public void addAddress(Address address) {
+        addresses.add(address);
+        address.setPerson(this);
+    }
+
+    public void removeAddress(Address address) {
+        addresses.remove(address);
+        address.setPerson(null);
+    }
+
     public ResidencePermit getLastResidencePermit() {
         return residencePermits.stream()
                 .max(Comparator.comparing(ResidencePermit::getDateOfIssue)) // or expiryDate
@@ -80,6 +90,16 @@ public class Person {
                 .filter(ResidencePermit::isActive)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void addPermit(ResidencePermit permit) {
+        residencePermits.add(permit);
+        permit.setPerson(this);
+    }
+
+    public void removePermit(ResidencePermit permit) {
+        residencePermits.remove(permit);
+        permit.setPerson(null);
     }
 
 

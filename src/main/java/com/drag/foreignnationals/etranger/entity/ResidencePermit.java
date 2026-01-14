@@ -36,6 +36,7 @@ public class ResidencePermit {
     private boolean active;
 
     private LocalDate expirationDate;
+
     @NotNull
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id", nullable = false)
