@@ -9,6 +9,7 @@ import com.drag.foreignnationals.etranger.entity.Commune;
 import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
+import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.repository.AddressRepository;
 import com.drag.foreignnationals.etranger.repository.CommuneRepository;
 import com.drag.foreignnationals.etranger.repository.NationalityRepository;
@@ -16,6 +17,7 @@ import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.service.AddressService;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@Transactional
+
 class AddressServiceIT extends AbstractMySqlIT {
 
     @Autowired
@@ -47,6 +49,14 @@ class AddressServiceIT extends AbstractMySqlIT {
 
     @Autowired
     private NationalityRepository nationalityRepository;
+
+    @BeforeEach
+    void cleanup() {
+        // Order matters: delete child tables first
+        addressRepository.deleteAll();
+        personRepository.deleteAll();
+        nationalityRepository.deleteAll();
+    }
 
     // ======================================================
     // ADD ADDRESS — POSITIVE FLOWS
@@ -70,11 +80,16 @@ class AddressServiceIT extends AbstractMySqlIT {
             assertThat(result.getId()).isNotNull();
             assertThat(result.isCurrent()).isTrue();
 
-            Person reloaded =
-                    personRepository.findById(person.getId()).orElseThrow();
+            List<Address> addresses = addressRepository.findByPersonId(person.getId());
+            Address currentAddress = addresses.stream()
+                    .filter(Address::isCurrent)
+                    .findFirst().orElseThrow(() ->
+                            new BusinessException(ErrorCode.INVALID_DATA, "Person must have one current address")
+                    );
 
-            Assertions.assertThat(reloaded.getAddresses()).hasSize(1);
-            assertThat(reloaded.getCurrentAddress()).isNotNull();
+
+            Assertions.assertThat(addresses).hasSize(1);
+            assertThat(currentAddress).isNotNull();
         }
 
         @Test
@@ -92,17 +107,20 @@ class AddressServiceIT extends AbstractMySqlIT {
             addressService.add(person.getId(), addressDto(commune2.getId()));
 
             // THEN
-            Person reloaded =
-                    personRepository.findById(person.getId()).orElseThrow();
+            List<Address> addresses = addressRepository.findByPersonId(person.getId());
+            Address currentAddress = addresses.stream()
+                    .filter(Address::isCurrent)
+                    .findFirst().orElseThrow(() ->
+                            new BusinessException(ErrorCode.INVALID_DATA, "Person must have one current address")
+                    );
 
-            Assertions.assertThat(reloaded.getAddresses()).hasSize(2);
-            assertThat(reloaded.getCurrentAddress().getCommune().getId())
+            Assertions.assertThat(addresses).hasSize(2);
+            assertThat(currentAddress.getCommune().getId())
                     .isEqualTo(commune2.getId());
 
-            long currentCount =
-                    reloaded.getAddresses().stream().filter(Address::isCurrent).count();
 
-            assertThat(currentCount).isEqualTo(1);
+
+            assertThat(addresses.stream().filter(Address::isCurrent).count()).isEqualTo(1);
         }
     }
 

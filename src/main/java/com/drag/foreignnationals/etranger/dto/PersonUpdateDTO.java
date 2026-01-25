@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonCreateDTO {
+public class PersonUpdateDTO {
 
     @NotBlank(message = "First name is required")
     private String firstName;
@@ -28,9 +28,10 @@ public class PersonCreateDTO {
     @NotNull(message = "Gender is required")
     private Person.Gender gender;
 
-    @NotNull(message = "Nationality is required")
+    @NotNull
     private Long nationalityId;
 
     private Long situationId;
     private AddressCreateDto currentAddress;
 }
+

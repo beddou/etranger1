@@ -3,6 +3,7 @@ package com.drag.foreignnationals.etranger.mapper;
 import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDTO;
 import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
+import com.drag.foreignnationals.etranger.dto.PersonUpdateDTO;
 import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
@@ -41,7 +42,7 @@ public interface PersonMapper {
     @Mapping(target = "situation", ignore = true)
     @Mapping(target = "residencePermits", ignore = true)
     @Mapping(target = "addresses", ignore = true)
-    void updateEntityFromDto(PersonCreateDTO dto, @MappingTarget Person entity);
+    void updateEntityFromDto(PersonUpdateDTO dto, @MappingTarget Person entity);
 
     // After mapping: set currentAddress and lastResidencePermit for detail DTO
     @AfterMapping

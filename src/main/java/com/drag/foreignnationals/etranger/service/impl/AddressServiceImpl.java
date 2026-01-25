@@ -73,6 +73,7 @@ public class AddressServiceImpl implements AddressService {
         return(addressMapper.toDTO(addressRepository.save(address))) ;
 
 }
+@Transactional
     public List<AddressDTO> getAllByPerson(Long idPerson) {
 
         return addressRepository.findByPersonId(idPerson)

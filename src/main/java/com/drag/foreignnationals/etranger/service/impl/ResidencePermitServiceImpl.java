@@ -91,7 +91,7 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
     }
 
-
+@Transactional
     public List<ResidencePermitDTO> getByPersonId(Long personId) {
 
         return permitRepository.findByPersonId(personId).stream()
@@ -99,7 +99,7 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
                 .toList();
     }
 
-
+@Transactional
     public ResidencePermitDTO getById(Long id) {
         ResidencePermit permit = permitRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(

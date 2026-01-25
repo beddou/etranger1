@@ -1,10 +1,7 @@
 package com.drag.foreignnationals.etranger.controller;
 
 
-import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDTO;
-import com.drag.foreignnationals.etranger.dto.PersonDetailDTO;
-import com.drag.foreignnationals.etranger.dto.PersonPatchDTO;
+import com.drag.foreignnationals.etranger.dto.*;
 
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.validation.Valid;
@@ -53,7 +50,7 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDetailDTO> update(@Valid @PathVariable Long id, @Valid @RequestBody PersonCreateDTO dto) {
+    public ResponseEntity<PersonDetailDTO> update(@Valid @PathVariable Long id, @Valid @RequestBody PersonUpdateDTO dto) {
         return ResponseEntity.ok(personService.update(id, dto));
     }
 

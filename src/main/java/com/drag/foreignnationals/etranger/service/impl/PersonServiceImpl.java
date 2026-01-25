@@ -9,11 +9,9 @@ import com.drag.foreignnationals.etranger.exception.BusinessException;
 import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.mapper.AddressMapper;
 import com.drag.foreignnationals.etranger.mapper.PersonMapper;
-
 import com.drag.foreignnationals.etranger.repository.*;
 import com.drag.foreignnationals.etranger.service.PersonService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,9 +19,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 
-
+@Validated
 @Service
 @RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
@@ -71,20 +71,20 @@ public class PersonServiceImpl implements PersonService {
         // 1. map basic fields
         Person person = personMapper.toEntity(dto);
 
-            // 2. set nationality (required)
-            Nationality nat = nationalityRepository.findById(dto.getNationalityId())
-                    .orElseThrow(() -> new BusinessException(
-                            ErrorCode.ENTITY_NOT_FOUND, "Nationality not found"));
-            person.setNationality(nat);
+        // 2. set nationality (required)
+        Nationality nat = nationalityRepository.findById(dto.getNationalityId())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND, "Nationality not found"));
+        person.setNationality(nat);
 
-            // 3. set situation if provided (optional)
-            if (dto.getSituationId() != null) {
-                situationRepository.findById(dto.getSituationId())
-                        .ifPresent(person::setSituation);
-            }
+        // 3. set situation if provided (optional)
+        if (dto.getSituationId() != null) {
+            situationRepository.findById(dto.getSituationId())
+                    .ifPresent(person::setSituation);
+        }
 
-            // 5. handle current address (if provided)
-            // (mandatory commune if address exists)
+        // 5. handle current address (if provided)
+        // (mandatory commune if address exists)
         if (dto.getCurrentAddress() != null) {
 
             Address address = addressMapper.toEntity(dto.getCurrentAddress());
@@ -99,32 +99,30 @@ public class PersonServiceImpl implements PersonService {
             Commune commune = communeRepository.findById(communeId)
                     .orElseThrow(() -> new BusinessException(
                             ErrorCode.ENTITY_NOT_FOUND, "Commune not found"));
-                // set relationships
+            // set relationships
             address.setCommune(commune);
-                address.setPerson(person);
-                address.setCurrent(true);
+            address.setPerson(person);
+            address.setCurrent(true);
 
-                // ensure person.addresses contains it
-                person.getAddresses().add(address);// cascade saves it later
+            // ensure person.addresses contains it
+            person.getAddresses().add(address);// cascade saves it later
 
-            }
+        }
 
-            // 5. Persist everything in one transaction
-            Person savedPerson = personRepository.save(person);
+        // 5. Persist everything in one transaction
+        Person savedPerson = personRepository.save(person);
 
-            // return detail dto
-            return personMapper.toPersonDetailDto(savedPerson);
-
-
+        // return detail dto
+        return personMapper.toPersonDetailDto(savedPerson);
 
 
-}
+    }
 
     @Override
     @Transactional(readOnly = true)
     public PersonDetailDTO getById(Long id) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + id));
 
         return personMapper.toPersonDetailDto(person);
     }
@@ -132,9 +130,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
 
     @Transactional
-    public PersonDetailDTO update(Long id, PersonCreateDTO dto) {
+    public PersonDetailDTO update(Long id, PersonUpdateDTO dto) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND,"Person not found with ID " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + id));
 
         // Update Person scalar fields
         personMapper.updateEntityFromDto(dto, person);
@@ -207,7 +205,6 @@ public class PersonServiceImpl implements PersonService {
     }
 
 
-
     @Override
     @Transactional
     public void delete(Long id) {
@@ -219,6 +216,7 @@ public class PersonServiceImpl implements PersonService {
 
 
     //*****************************************
+
     ///  set current address
     private void updateCurrentAddress(Person person, AddressCreateDto addressDTO) {
 

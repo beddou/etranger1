@@ -261,7 +261,7 @@ class PersonServiceTest {
 
     @Test
     void update_shouldUpdatePerson() {
-        PersonCreateDTO dto = new PersonCreateDTO();
+        PersonUpdateDTO dto = new PersonUpdateDTO();
         dto.setNationalityId(5L);
 
         Nationality nat = new Nationality();
@@ -281,7 +281,7 @@ class PersonServiceTest {
     void update_shouldThrow_whenPersonNotFound() {
         when(personRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(BusinessException.class, () -> personService.update(1L, new PersonCreateDTO()));
+        assertThrows(BusinessException.class, () -> personService.update(1L, new PersonUpdateDTO()));
     }
     }
 

@@ -3,11 +3,13 @@ package com.drag.foreignnationals.etranger.integrationTest.service;
 import com.drag.foreignnationals.etranger.AbstractMySqlIT;
 import com.drag.foreignnationals.etranger.dto.PersonCreateDTO;
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
+import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Nationality;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.enums.ResidenceType;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
+import com.drag.foreignnationals.etranger.exception.ErrorCode;
 import com.drag.foreignnationals.etranger.repository.NationalityRepository;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
@@ -15,6 +17,7 @@ import com.drag.foreignnationals.etranger.service.PersonService;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@Transactional
+
 class ResidencePermitServiceIT extends AbstractMySqlIT {
 
     @Autowired
@@ -45,8 +48,15 @@ class ResidencePermitServiceIT extends AbstractMySqlIT {
     @Autowired
     private NationalityRepository nationalityRepository;
 
-    @Autowired
-    private EntityManager entityManager;
+    //@Autowired
+    //private EntityManager entityManager;
+
+    @BeforeEach
+    void cleanup() {
+        // Order matters: delete child tables first
+        personRepository.deleteAll();
+        nationalityRepository.deleteAll();
+    }
 
     // ============================================================
     // POSITIVE BUSINESS FLOWS
@@ -82,11 +92,14 @@ class ResidencePermitServiceIT extends AbstractMySqlIT {
             ResidencePermitDTO first = permitService.create(permitDto(person.getId()));
             ResidencePermitDTO second = permitService.create(permitDto(person.getId()));
 
-            // WHEN
-            Person reloaded =
-                    personRepository.findById(person.getId()).orElseThrow();
 
-            List<ResidencePermit> permits = reloaded.getResidencePermits();
+            List<ResidencePermit> permits = permitRepository.findByPersonId(person.getId());
+
+            ResidencePermit activePermit = permits.stream()
+                    .filter(ResidencePermit::isActive)
+                            .findFirst().orElseThrow( () ->
+                            new BusinessException(ErrorCode.INVALID_DATA, "No valid residence permit was found ")
+                    );
 
             // THEN
             Assertions.assertThat(permits).hasSize(2);
@@ -95,7 +108,7 @@ class ResidencePermitServiceIT extends AbstractMySqlIT {
                     permits.stream().filter(ResidencePermit::isActive).count();
 
             assertThat(activeCount).isEqualTo(1);
-            assertThat(reloaded.getActiveResidencePermit().getId())
+            assertThat(activePermit.getId())
                     .isEqualTo(second.getId());
         }
     }
@@ -160,15 +173,9 @@ class ResidencePermitServiceIT extends AbstractMySqlIT {
         ResidencePermitDTO created =
                 permitService.create(permitDto(person.getId()));
 
-        // WHEN
 
-        entityManager.flush();
-        entityManager.clear();
-
+        assertThat(permitRepository.existsById(created.getId())).isTrue();
         permitService.delete(created.getId());
-
-        entityManager.flush();
-        entityManager.clear();
 
         // THEN
         assertThat(permitRepository.existsById(created.getId())).isFalse();
