@@ -2,9 +2,7 @@ package com.drag.foreignnationals.etranger.unitTest.service.residencePermit;
 
 
 
-import com.drag.foreignnationals.etranger.dto.AddressDTO;
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
-import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -81,7 +79,7 @@ public class ResidencePermitTest  {
             when(permitRepository.save(permit)).thenReturn(permit);
             when(permitMapper.toDTO(permit)).thenReturn(permitDTO);
 
-            ResidencePermitDTO result = service.create(permitDTO);
+            ResidencePermitDTO result = service.create(person.getId(), permitDTO);
 
             assertNotNull(result);
             assertEquals(1L, result.getId());
@@ -113,7 +111,7 @@ public class ResidencePermitTest  {
 
 
             // Act
-            ResidencePermitDTO result = service.create(permitDTO);
+            ResidencePermitDTO result = service.create(person.getId(), permitDTO);
 
             // Assert
             assertNotNull(result);
@@ -127,24 +125,14 @@ public class ResidencePermitTest  {
 
         }
 
-        @Test
-        void shouldThrowValidationErrorWhenPersonIdIsNull() {
-            permitDTO.setPersonId(null);
 
-            BusinessException ex = assertThrows(BusinessException.class,
-                    () -> service.create(permitDTO));
-
-            assertEquals(ErrorCode.VALIDATION_ERROR, ex.getErrorCode());
-            assertTrue(ex.getMessage().contains("Person information is required"));
-            verifyNoInteractions(personRepository, permitRepository, permitMapper);
-        }
 
         @Test
         void shouldThrowEntityNotFoundWhenPersonDoesNotExist() {
             when(personRepository.findById(1L)).thenReturn(Optional.empty());
 
             BusinessException ex = assertThrows(BusinessException.class,
-                    () -> service.create(permitDTO));
+                    () -> service.create(person.getId(), permitDTO));
 
             assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
             assertTrue(ex.getMessage().contains("Person not found"));
@@ -165,11 +153,12 @@ public class ResidencePermitTest  {
             updateDTO.setDateOfIssue(LocalDate.of(2025, 2, 1));
             updateDTO.setDurationInMonths(24);
 
+            when(personRepository.findById(person.getId())).thenReturn(Optional.of(person));
             when(permitRepository.findById(1L)).thenReturn(Optional.of(permit));
             when(permitRepository.save(permit)).thenReturn(permit);
             when(permitMapper.toDTO(permit)).thenReturn(updateDTO);
 
-            ResidencePermitDTO result = service.update(1L, updateDTO);
+            ResidencePermitDTO result = service.update(person.getId(),1L, updateDTO);
 
             assertEquals(updateDTO, result);
             assertEquals(LocalDate.of(2025, 2, 1), permit.getDateOfIssue());
@@ -182,10 +171,11 @@ public class ResidencePermitTest  {
 
         @Test
         void shouldThrowEntityNotFoundWhenPermitDoesNotExist() {
+            when(personRepository.findById(person.getId())).thenReturn(Optional.of(person));
             when(permitRepository.findById(1L)).thenReturn(Optional.empty());
 
             BusinessException ex = assertThrows(BusinessException.class,
-                    () -> service.update(1L, permitDTO));
+                    () -> service.update(person.getId(),1L, permitDTO));
 
             assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
             verify(permitRepository).findById(1L);
@@ -203,7 +193,7 @@ public class ResidencePermitTest  {
         void shouldDeleteResidencePermitSuccessfully() {
             when(permitRepository.findById(1L)).thenReturn(Optional.of(permit));
 
-            service.delete(1L);
+            service.delete(person.getId(),1L);
 
             verify(permitRepository).delete(permit);
         }
@@ -213,7 +203,7 @@ public class ResidencePermitTest  {
             when(permitRepository.findById(1L)).thenReturn(Optional.empty());
 
             BusinessException ex = assertThrows(BusinessException.class,
-                    () -> service.delete(1L));
+                    () -> service.delete(person.getId(),1L));
 
             assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
             verify(permitRepository).findById(1L);
@@ -255,7 +245,7 @@ public class ResidencePermitTest  {
             when(permitRepository.findById(1L)).thenReturn(Optional.of(permit));
             when(permitMapper.toDTO(permit)).thenReturn(permitDTO);
 
-            ResidencePermitDTO result = service.getById(1L);
+            ResidencePermitDTO result = service.getById(person.getId(),1L);
 
             assertEquals(permitDTO, result);
 
@@ -268,7 +258,7 @@ public class ResidencePermitTest  {
             when(permitRepository.findById(1L)).thenReturn(Optional.empty());
 
             BusinessException ex = assertThrows(BusinessException.class,
-                    () -> service.getById(1L));
+                    () -> service.getById(person.getId(),1L));
 
             assertEquals(ErrorCode.ENTITY_NOT_FOUND, ex.getErrorCode());
             verify(permitRepository).findById(1L);

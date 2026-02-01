@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -82,7 +83,7 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                ErrorCode.CONSTRAINT_VIOLATION,
+                ErrorCode.VALIDATION_ERROR,
                 "Validation failed for request parameters",
                 request.getRequestURI(),
                 fieldErrors
@@ -90,6 +91,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
 
 
     @ExceptionHandler(DataIntegrityViolationException.class)

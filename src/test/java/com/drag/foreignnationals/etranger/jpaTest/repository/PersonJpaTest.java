@@ -324,6 +324,8 @@ public class PersonJpaTest {
 
         // Now switch
         saved.getAddresses().forEach(a -> a.setCurrent(false));
+        personRepository.save(saved); // flush first
+        em.flush();
         saved.getAddresses().get(1).setCurrent(true); // Lyon becomes current
 
         personRepository.save(saved);

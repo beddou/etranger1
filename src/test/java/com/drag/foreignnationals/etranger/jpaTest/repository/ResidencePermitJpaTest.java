@@ -139,6 +139,7 @@ class ResidencePermitJpaTest {
                 .durationInMonths(12)
                 .person(person)
                 .type(ResidenceType.Commerçant)
+                .active(false)
                 .build();
 
         ResidencePermit p2 = ResidencePermit.builder()
@@ -146,6 +147,7 @@ class ResidencePermitJpaTest {
                 .durationInMonths(24)
                 .person(person)
                 .type(ResidenceType.Etudiant)
+                .active(true)
                 .build();
 
         permitRepository.saveAll(List.of(p1, p2));

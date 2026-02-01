@@ -1,7 +1,6 @@
 package com.drag.foreignnationals.etranger.service.impl;
 
 import com.drag.foreignnationals.etranger.dto.ResidencePermitDTO;
-import com.drag.foreignnationals.etranger.entity.Address;
 import com.drag.foreignnationals.etranger.entity.Person;
 import com.drag.foreignnationals.etranger.entity.ResidencePermit;
 import com.drag.foreignnationals.etranger.exception.BusinessException;
@@ -10,8 +9,6 @@ import com.drag.foreignnationals.etranger.mapper.ResidencePermitMapper;
 import com.drag.foreignnationals.etranger.repository.PersonRepository;
 import com.drag.foreignnationals.etranger.repository.ResidencePermitRepository;
 import com.drag.foreignnationals.etranger.service.ResidencePermitService;
-
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,19 +30,11 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
 
 
     @Transactional
-    public ResidencePermitDTO create(ResidencePermitDTO dto) {
-        if (dto.getPersonId() == null ) {
-            throw new BusinessException(
-                    ErrorCode.VALIDATION_ERROR,
-                    "Person information is required to create a residence permit."
-            );
-        }
+    public ResidencePermitDTO create(Long personId, ResidencePermitDTO dto) {
 
-        long personId = dto.getPersonId();
-
-            Person person = personRepository.findById(personId)
-                    .orElseThrow(() ->new BusinessException(
-                            ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + personId));
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND, "Person not found with ID " + personId));
 
 
         // Get active residence permit
@@ -58,40 +47,56 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
         ResidencePermit permit = permitMapper.toEntity(dto);
         permit.setActive(true);
         person.addPermit(permit);
-        ResidencePermit saved = permitRepository.save(permit);
-            return permitMapper.toDTO(saved);
+        return permitMapper.toDTO(permitRepository.save(permit));
 
 
     }
 
     @Transactional
-    public ResidencePermitDTO update(Long id, ResidencePermitDTO dto) {
-        ResidencePermit existing = permitRepository.findById(id)
+    public ResidencePermitDTO update(Long personId, Long permitId, ResidencePermitDTO dto) {
+        Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new BusinessException(
-                        ErrorCode.ENTITY_NOT_FOUND, "Residence permit not found with ID " + id));
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "Person not found with ID " + personId
+                ));
+
+        ResidencePermit existing = permitRepository.findById(permitId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENTITY_NOT_FOUND, "Residence permit not found with ID " + permitId));
 
 
         existing.setDateOfIssue(dto.getDateOfIssue());
         existing.setDurationInMonths(dto.getDurationInMonths());
+        existing.setType(dto.getType());
 
         ResidencePermit updated = permitRepository.save(existing);
         return permitMapper.toDTO(permitRepository.save(updated));
     }
 
-@Transactional
-    public void delete(Long id) {
+    @Transactional
+    public void delete(Long personId, Long permitId) {
 
-        ResidencePermit permit = permitRepository.findById(id)
+        ResidencePermit permit = permitRepository.findById(permitId)
+                .filter(p -> p.getPerson().getId().equals(personId))
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.ENTITY_NOT_FOUND,
-                        "Residence permit not found with ID " + id
+                        "Residence permit not found for this person with ID " + permitId
                 ));
 
-    permitRepository.delete(permit);
+
+        // Prevent deletion if permit is active
+        if (permit.isActive()) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "Cannot delete active residence permit"
+            );
+        }
+
+        permitRepository.delete(permit);
 
     }
 
-@Transactional
+    @Transactional
     public List<ResidencePermitDTO> getByPersonId(Long personId) {
 
         return permitRepository.findByPersonId(personId).stream()
@@ -99,11 +104,16 @@ public class ResidencePermitServiceImpl implements ResidencePermitService {
                 .toList();
     }
 
-@Transactional
-    public ResidencePermitDTO getById(Long id) {
-        ResidencePermit permit = permitRepository.findById(id)
+    @Transactional
+    public ResidencePermitDTO getById(Long personId, Long permitId) {
+
+        ResidencePermit permit = permitRepository.findById(permitId)
+                .filter(p -> p.getPerson().getId().equals(personId))
                 .orElseThrow(() -> new BusinessException(
-                        ErrorCode.ENTITY_NOT_FOUND, "Residence permit not found with ID " + id ));
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "Residence permit not found for this person with ID " + permitId
+                ));
+
         return permitMapper.toDTO(permit);
     }
 }
