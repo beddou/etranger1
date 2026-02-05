@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -129,6 +130,24 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(ResponseStatusException ex,
+                                                                 HttpServletRequest request) {
+
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(new ApiErrorResponse(
+                        LocalDateTime.now(),
+                        ex.getStatusCode().value(),
+                        ErrorCode.UNAUTHORIZED,
+                        ex.getReason(),
+                        request.getRequestURI(),
+                        null
+                ));
+
+
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(

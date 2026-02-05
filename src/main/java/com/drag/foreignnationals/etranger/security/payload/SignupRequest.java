@@ -1,8 +1,12 @@
-package com.drag.foreignnationals.etranger.entity;
+package com.drag.foreignnationals.etranger.security.payload;
 
 import com.drag.foreignnationals.etranger.enums.Role;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,21 +14,18 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+public class SignupRequest {
 
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @NotBlank
+    @Size(min = 3, max = 20)
     private String username;
 
+    @NotBlank
+    @Size(min = 6, max = 20)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -41,12 +42,4 @@ public class User {
     @NotNull
     @Column(nullable = false)
     private LocalDate dateOfBirth;
-
-    @Builder.Default
-    private boolean active = true;   // true = account enabled
-
-    @Builder.Default
-    private boolean locked = false;  // true = account locked
-
-    // Getters & setters
 }

@@ -8,5 +8,6 @@ public enum ErrorCode {
     INTERNAL_ERROR,
     DATABASE_ERROR,
     INVALID_DATA,
+    UNAUTHORIZED,
 
 }
