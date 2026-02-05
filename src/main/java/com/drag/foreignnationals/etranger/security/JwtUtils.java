@@ -1,15 +1,19 @@
 package com.drag.foreignnationals.etranger.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtils {
@@ -19,14 +23,36 @@ public class JwtUtils {
 
     private final long jwtExpirationMs = 15 * 60 * 1000; // 15 minutes
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(CustomUserDetails userDetails) {
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
-                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public List<SimpleGrantedAuthority> getAuthoritiesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object roles = claims.get("roles");
+        if (roles instanceof List<?> list) {
+            return list.stream()
+                    .map(role -> new SimpleGrantedAuthority(role.toString()))
+                    .toList();
+        } else if (roles instanceof String roleString) {
+            return List.of(new SimpleGrantedAuthority(roleString));
+        }
+        return List.of();
     }
 
     private Key key() {

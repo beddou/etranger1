@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+
 public class ApiTest {
-    /*@GetMapping("/api/test")
+    @GetMapping("/api/test")
     public String secured() {
         return "secured ok";
-    }*/
+    }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/test")
     public String adminOnly() {
         return "admin ok";

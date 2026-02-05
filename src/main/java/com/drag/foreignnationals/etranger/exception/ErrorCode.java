@@ -9,5 +9,6 @@ public enum ErrorCode {
     DATABASE_ERROR,
     INVALID_DATA,
     UNAUTHORIZED,
+    FORBIDDEN, ACCESS_DENIED,
 
 }

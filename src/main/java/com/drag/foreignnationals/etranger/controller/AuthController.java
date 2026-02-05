@@ -4,6 +4,7 @@ import com.drag.foreignnationals.etranger.entity.RefreshToken;
 import com.drag.foreignnationals.etranger.entity.User;
 import com.drag.foreignnationals.etranger.repository.RefreshTokenRepository;
 import com.drag.foreignnationals.etranger.repository.UserRepository;
+import com.drag.foreignnationals.etranger.security.CustomUserDetails;
 import com.drag.foreignnationals.etranger.security.CustomUserDetailsService;
 import com.drag.foreignnationals.etranger.security.JwtUtils;
 import com.drag.foreignnationals.etranger.security.payload.LoginRequest;
@@ -34,27 +35,6 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
 
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
-
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        String accessToken = jwtUtils.generateToken(userDetails);
-
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-
-        return ResponseEntity.ok(
-                Map.of(
-                        "accessToken", accessToken,
-                        "refreshToken", refreshToken.getToken()
-                )
-        );
-    }
-
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequest request) {
 
@@ -66,7 +46,7 @@ public class AuthController {
 
         User user = refreshToken.getUser();
 
-        UserDetails userDetails =
+        CustomUserDetails userDetails =
                 userDetailsService.loadUserByUsername(user.getUsername());
 
         String newAccessToken = jwtUtils.generateToken(userDetails);
