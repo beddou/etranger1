@@ -156,7 +156,7 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.FORBIDDEN.value(),
-                ErrorCode.ACCESS_DENIED, // Make sure this exists in your ErrorCode enum
+                ErrorCode.ACCESS_DENIED,
                 "Access Denied: You do not have the required permissions to access this resource",
                 request.getRequestURI(),
                 null

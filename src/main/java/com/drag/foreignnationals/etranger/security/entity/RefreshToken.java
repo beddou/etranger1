@@ -1,4 +1,4 @@
-package com.drag.foreignnationals.etranger.entity;
+package com.drag.foreignnationals.etranger.security.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

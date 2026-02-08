@@ -1,7 +1,12 @@
 package com.drag.foreignnationals.etranger.security;
 
-import com.drag.foreignnationals.etranger.repository.UserRepository;
-import com.drag.foreignnationals.etranger.service.RefreshTokenService;
+import com.drag.foreignnationals.etranger.security.repository.UserRepository;
+import com.drag.foreignnationals.etranger.security.filter.guard.JwtAuthFilter;
+import com.drag.foreignnationals.etranger.security.jwt.JwtUtils;
+import com.drag.foreignnationals.etranger.security.filter.login.JwtLoginFilter;
+import com.drag.foreignnationals.etranger.security.service.CustomUserDetailsService;
+import com.drag.foreignnationals.etranger.security.service.RefreshTokenService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,6 +58,22 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // --- ADD THIS SECTION ---
+                .exceptionHandling(exception -> exception
+                        // 1. Handle Unauthenticated (No/Bad Token) -> 401
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"errorCode\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}");
+                        })
+                        // 2. Handle Unauthorized (Wrong Role) -> 403
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"errorCode\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions\"}");
+                        })
+                )
+                // ------------------------
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/logout","/auth/refresh", "/error").permitAll()
                         //.requestMatchers("/admin/**").hasRole("ADMIN")

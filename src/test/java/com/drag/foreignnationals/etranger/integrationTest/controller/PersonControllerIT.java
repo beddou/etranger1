@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -26,11 +28,13 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@WithMockUser(roles = "USER")
 class PersonControllerIT extends AbstractMySqlIT {
 
     @Autowired
@@ -59,6 +63,8 @@ class PersonControllerIT extends AbstractMySqlIT {
         personRepository.deleteAll();
         nationalityRepository.deleteAll();
     }
+
+
 
     private Nationality createNationality() {
         return nationalityRepository.save(
@@ -94,9 +100,11 @@ class PersonControllerIT extends AbstractMySqlIT {
     CREATE — Positive Tests
      ============================================================*/
     @Nested
+
     class CreatePersonPositive {
 
         @Test
+
         void shouldCreatePersonSuccessfully() throws Exception {
             // GIVEN
             Nationality nat = createNationality();
@@ -104,6 +112,7 @@ class PersonControllerIT extends AbstractMySqlIT {
 
             // WHEN + THEN
             mockMvc.perform(post("/api/persons")
+                            //.with(regularUser())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
@@ -280,6 +289,7 @@ class PersonControllerIT extends AbstractMySqlIT {
     class DeletePerson {
 
         @Test
+        @WithMockUser(roles = "ADMIN")
         void shouldDeletePersonSuccessfully() throws Exception {
             Nationality nat = createNationality();
 
@@ -361,6 +371,28 @@ class PersonControllerIT extends AbstractMySqlIT {
                             )));
         }
 
+    }
+
+    /*============================================================
+    SECURITY — New Negative Tests
+     ============================================================*/
+    @Nested
+    class SecurityTests {
+
+        @Test
+        void shouldFailWhenUnauthenticated() throws Exception {
+            // No .with(user()) here
+            mockMvc.perform(get("/api/persons").with(anonymous()))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void shouldFailWhenUserIsMissingRequiredRole() throws Exception {
+            // Assume DELETE requires ADMIN, but we provide USER
+            mockMvc.perform(delete("/api/persons/1")
+                            )
+                    .andExpect(status().isForbidden()); // 403
+        }
     }
 
 

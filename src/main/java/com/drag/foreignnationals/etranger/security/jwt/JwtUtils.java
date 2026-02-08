@@ -1,5 +1,6 @@
-package com.drag.foreignnationals.etranger.security;
+package com.drag.foreignnationals.etranger.security.jwt;
 
+import com.drag.foreignnationals.etranger.security.model.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

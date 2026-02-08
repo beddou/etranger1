@@ -1,7 +1,6 @@
-package com.drag.foreignnationals.etranger.repository;
+package com.drag.foreignnationals.etranger.security.repository;
 
-import com.drag.foreignnationals.etranger.entity.Person;
-import com.drag.foreignnationals.etranger.entity.User;
+import com.drag.foreignnationals.etranger.security.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

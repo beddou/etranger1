@@ -1,6 +1,6 @@
-package com.drag.foreignnationals.etranger.security;
+package com.drag.foreignnationals.etranger.security.model;
 
-import com.drag.foreignnationals.etranger.entity.User;
+import com.drag.foreignnationals.etranger.security.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

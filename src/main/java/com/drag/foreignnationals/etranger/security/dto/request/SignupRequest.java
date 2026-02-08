@@ -1,4 +1,4 @@
-package com.drag.foreignnationals.etranger.security.payload;
+package com.drag.foreignnationals.etranger.security.dto.request;
 
 import com.drag.foreignnationals.etranger.enums.Role;
 import jakarta.persistence.Column;
@@ -31,11 +31,11 @@ public class SignupRequest {
     @Enumerated(EnumType.STRING)
     private Role role; // USER or ADMIN
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String firstName;
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String lastName;
 

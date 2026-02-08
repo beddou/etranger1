@@ -1,22 +1,19 @@
-package com.drag.foreignnationals.etranger.security;
+package com.drag.foreignnationals.etranger.security.service;
 
-import com.drag.foreignnationals.etranger.entity.User;
-import com.drag.foreignnationals.etranger.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.drag.foreignnationals.etranger.security.entity.User;
+import com.drag.foreignnationals.etranger.security.repository.UserRepository;
+import com.drag.foreignnationals.etranger.security.model.CustomUserDetails;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
     private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository repository) {
-        this.userRepository = repository;
-    }
 
     @Override
     public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

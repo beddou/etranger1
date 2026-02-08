@@ -1,4 +1,4 @@
-package com.drag.foreignnationals.etranger.security.payload;
+package com.drag.foreignnationals.etranger.security.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

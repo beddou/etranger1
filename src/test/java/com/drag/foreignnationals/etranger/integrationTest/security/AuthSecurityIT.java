@@ -1,13 +1,14 @@
 package com.drag.foreignnationals.etranger.integrationTest.security;
 
 import com.drag.foreignnationals.etranger.AbstractMySqlIT;
-import com.drag.foreignnationals.etranger.entity.RefreshToken;
-import com.drag.foreignnationals.etranger.entity.User;
+import com.drag.foreignnationals.etranger.security.entity.RefreshToken;
+import com.drag.foreignnationals.etranger.security.entity.User;
 import com.drag.foreignnationals.etranger.enums.Role;
-import com.drag.foreignnationals.etranger.repository.RefreshTokenRepository;
-import com.drag.foreignnationals.etranger.repository.UserRepository;
-import com.drag.foreignnationals.etranger.service.RefreshTokenService;
+import com.drag.foreignnationals.etranger.security.repository.RefreshTokenRepository;
+import com.drag.foreignnationals.etranger.security.repository.UserRepository;
+import com.drag.foreignnationals.etranger.security.service.RefreshTokenService;
 import com.jayway.jsonpath.JsonPath;
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+
 public class AuthSecurityIT extends AbstractMySqlIT{
 
     @Autowired

@@ -1,7 +1,8 @@
-package com.drag.foreignnationals.etranger.entity;
+package com.drag.foreignnationals.etranger.security.entity;
 
 import com.drag.foreignnationals.etranger.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,11 +31,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role; // USER or ADMIN
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String firstName;
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String lastName;
 

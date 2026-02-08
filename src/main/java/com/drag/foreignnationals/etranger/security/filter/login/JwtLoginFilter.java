@@ -1,9 +1,11 @@
-package com.drag.foreignnationals.etranger.security;
+package com.drag.foreignnationals.etranger.security.filter.login;
 
-import com.drag.foreignnationals.etranger.entity.RefreshToken;
-import com.drag.foreignnationals.etranger.entity.User;
-import com.drag.foreignnationals.etranger.repository.UserRepository;
-import com.drag.foreignnationals.etranger.service.RefreshTokenService;
+import com.drag.foreignnationals.etranger.security.entity.RefreshToken;
+import com.drag.foreignnationals.etranger.security.entity.User;
+import com.drag.foreignnationals.etranger.security.repository.UserRepository;
+import com.drag.foreignnationals.etranger.security.model.CustomUserDetails;
+import com.drag.foreignnationals.etranger.security.jwt.JwtUtils;
+import com.drag.foreignnationals.etranger.security.service.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;

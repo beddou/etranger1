@@ -1,14 +1,17 @@
-package com.drag.foreignnationals.etranger.security;
+package com.drag.foreignnationals.etranger.security.filter.guard;
 
 
+import com.drag.foreignnationals.etranger.security.model.CustomUserDetails;
+import com.drag.foreignnationals.etranger.security.service.CustomUserDetailsService;
+import com.drag.foreignnationals.etranger.security.jwt.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,15 +20,11 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final CustomUserDetailsService userDetailsService;
-    private final JwtUtils jwtUtils;
-
-    public JwtAuthFilter(CustomUserDetailsService uds, JwtUtils jwtUtils) {
-        this.userDetailsService = uds;
-        this.jwtUtils = jwtUtils;
-    }
+    private CustomUserDetailsService userDetailsService;
+    private JwtUtils jwtUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
