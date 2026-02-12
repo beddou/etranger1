@@ -208,7 +208,7 @@ class PersonServiceTest {
                 () -> personService.create(dto)
         );
 
-        assertEquals(ErrorCode.INVALID_DATA, ex.getErrorCode());
+        assertEquals(ErrorCode.VALIDATION_ERROR, ex.getErrorCode());
         assertEquals("Commune is required when address is provided", ex.getMessage());
 
         Mockito.verify(personRepository, Mockito.never()).save(any());

@@ -84,7 +84,7 @@ class AddressServiceIT extends AbstractMySqlIT {
             Address currentAddress = addresses.stream()
                     .filter(Address::isCurrent)
                     .findFirst().orElseThrow(() ->
-                            new BusinessException(ErrorCode.INVALID_DATA, "Person must have one current address")
+                            new BusinessException(ErrorCode.VALIDATION_ERROR, "Person must have one current address")
                     );
 
 
@@ -111,7 +111,7 @@ class AddressServiceIT extends AbstractMySqlIT {
             Address currentAddress = addresses.stream()
                     .filter(Address::isCurrent)
                     .findFirst().orElseThrow(() ->
-                            new BusinessException(ErrorCode.INVALID_DATA, "Person must have one current address")
+                            new BusinessException(ErrorCode.VALIDATION_ERROR, "Person must have one current address")
                     );
 
             Assertions.assertThat(addresses).hasSize(2);

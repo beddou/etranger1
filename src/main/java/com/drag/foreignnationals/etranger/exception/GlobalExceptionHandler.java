@@ -25,12 +25,8 @@ public class GlobalExceptionHandler {
             BusinessException ex,
             HttpServletRequest request) {
 
-        HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        if (ex.getErrorCode() == ErrorCode.ENTITY_NOT_FOUND ) {
-            status = HttpStatus.NOT_FOUND;
-        }
-
+        HttpStatus status = ex.getErrorCode().getStatus();
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 status.value(),

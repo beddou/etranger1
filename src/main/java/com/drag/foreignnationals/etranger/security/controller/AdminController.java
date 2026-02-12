@@ -1,5 +1,6 @@
 package com.drag.foreignnationals.etranger.security.controller;
 
+import com.drag.foreignnationals.etranger.security.dto.response.UserResponse;
 import com.drag.foreignnationals.etranger.security.entity.User;
 import com.drag.foreignnationals.etranger.enums.Role;
 import com.drag.foreignnationals.etranger.security.dto.request.SignupRequest;
@@ -18,91 +19,49 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')") // Only ADMIN can manage users
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public AdminController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/users")
     public ResponseEntity<UserResponse> addUser(@Valid @RequestBody SignupRequest request) {
-        User user = userService.addUser(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new UserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getLastName(),
-                        user.getFirstName(),
-                        user.getRole(),
-                        user.isLocked(),
-                        user.isActive()
-                ));
+                .body(userService.addUser(request));
     }
 
-    @PostMapping("/users/{id}/lock")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
+    @PatchMapping("/users/{id}/lock")
     public ResponseEntity<UserResponse> lockUser(@PathVariable Long id) {
-        User user = userService.lockUser(id);
-        return ResponseEntity.ok(new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getLastName(),
-                user.getFirstName(),
-                user.getRole(),
-                user.isLocked(),
-                user.isActive()
-        ));
+
+        return ResponseEntity.ok(userService.lockUser(id));
     }
 
-    @PostMapping("/users/{id}/unlock")
+    @PatchMapping("/users/{id}/unlock")
     public ResponseEntity<UserResponse> unlockUser(@PathVariable Long id) {
-        User user = userService.unlockUser(id);
-        return ResponseEntity.ok(new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getLastName(),
-                user.getFirstName(),
-                user.getRole(),
-                user.isLocked(),
-                user.isActive()
-        ));
+
+        return ResponseEntity.ok(userService.unlockUser(id));
     }
 
-    @PostMapping("/users/{id}/role")
+    @PatchMapping("/users/{id}/role")
     public ResponseEntity<UserResponse> changeRole(@PathVariable Long id, @RequestParam Role role) {
-       User user = userService.setRole(id, role);
-        return ResponseEntity.ok(new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getLastName(),
-                user.getFirstName(),
-                user.getRole(),
-                user.isLocked(),
-                user.isActive()
-        ));
+
+        return ResponseEntity.ok(userService.setRole(id, role));
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> listUsers() {
-        return ResponseEntity.ok(userService.getAllUsers()
-                .stream()
-                .map(user -> new UserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getLastName(),
-                        user.getFirstName(),
-                        user.getRole(),
-                        user.isLocked(),
-                        user.isActive()))
-                .toList());
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    public record UserResponse(
-            Long id,
-            String username,
-            String LastName,
-            String FirstName,
-            Role role,
-            boolean isLocked,
-            boolean isActive
-    ) {}
+
 }
 
 

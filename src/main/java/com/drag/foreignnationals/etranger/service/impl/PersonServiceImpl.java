@@ -93,7 +93,7 @@ public class PersonServiceImpl implements PersonService {
 
             if (communeId == null) {
                 throw new BusinessException(
-                        ErrorCode.INVALID_DATA, "Commune is required when address is provided");
+                        ErrorCode.VALIDATION_ERROR, "Commune is required when address is provided");
             }
 
             Commune commune = communeRepository.findById(communeId)

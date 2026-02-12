@@ -95,7 +95,7 @@ class ResidencePermitServiceIT extends AbstractMySqlIT {
             ResidencePermit activePermit = permits.stream()
                     .filter(ResidencePermit::isActive)
                             .findFirst().orElseThrow( () ->
-                            new BusinessException(ErrorCode.INVALID_DATA, "No valid residence permit was found ")
+                            new BusinessException(ErrorCode.VALIDATION_ERROR, "No valid residence permit was found ")
                     );
 
             // THEN
