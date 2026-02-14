@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +26,7 @@ import java.util.Locale;
 @Table(name = "users")
 @SQLDelete(sql = "UPDATE users SET deleted = true, deleted_at = NOW(), active = false WHERE id = ?")
 @SQLRestriction("deleted = false")
-
+@Audited
 public class User {
 
     @Id
@@ -42,6 +44,7 @@ public class User {
         }
     }
 
+    @NotAudited
     private String password;
 
     @Enumerated(EnumType.STRING)

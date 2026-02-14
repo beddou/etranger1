@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         // Prevent Self-Deletion
         if (user.getUsername().equals(currentAdmin)) {
             throw new BusinessException(
-                    ErrorCode.VALIDATION_ERROR, "You cannot delete your own account.");
+                    ErrorCode.UNAUTHORIZED, "You cannot delete your own account.");
         }
         userRepository.delete(user);
 

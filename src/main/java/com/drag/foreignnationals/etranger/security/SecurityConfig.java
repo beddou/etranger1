@@ -1,5 +1,6 @@
 package com.drag.foreignnationals.etranger.security;
 
+import com.drag.foreignnationals.etranger.security.filter.login.RateLimitingFilter;
 import com.drag.foreignnationals.etranger.security.repository.UserRepository;
 import com.drag.foreignnationals.etranger.security.filter.guard.JwtAuthFilter;
 import com.drag.foreignnationals.etranger.security.jwt.JwtUtils;
@@ -7,6 +8,7 @@ import com.drag.foreignnationals.etranger.security.filter.login.JwtLoginFilter;
 import com.drag.foreignnationals.etranger.security.service.CustomUserDetailsService;
 import com.drag.foreignnationals.etranger.security.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +33,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthFilter jwtAuthFilter; // The "Security Guard" (OncePerRequestFilter)
     private final JwtUtils jwtUtils;
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
                           JwtAuthFilter jwtAuthFilter,
@@ -79,6 +83,7 @@ public class SecurityConfig {
                         //.requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilter(loginFilter);
 

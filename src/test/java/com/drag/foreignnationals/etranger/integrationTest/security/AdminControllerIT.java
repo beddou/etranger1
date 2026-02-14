@@ -4,6 +4,7 @@ package com.drag.foreignnationals.etranger.integrationTest.security;
 import com.drag.foreignnationals.etranger.AbstractMySqlIT;
 import com.drag.foreignnationals.etranger.enums.Role;
 import com.drag.foreignnationals.etranger.security.dto.request.SignupRequest;
+import com.drag.foreignnationals.etranger.security.entity.CustomRevisionEntity;
 import com.drag.foreignnationals.etranger.security.entity.User;
 import com.drag.foreignnationals.etranger.security.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.history.Revision;
+import org.springframework.data.history.Revisions;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -111,6 +114,21 @@ class AdminControllerIT extends AbstractMySqlIT {
         }
 
         @Test
+        void shouldUnlockUser() throws Exception {
+            User user = createTestUser("to_unLock", Role.USER);
+            user.setLocked(true);
+            user.setActive(true);
+
+            user = userRepository.save(user);
+
+            mockMvc.perform(patch("/admin/users/" + user.getId() + "/unlock"))
+                    .andExpect(status().isOk());
+
+            User updated = userRepository.findById(user.getId()).get();
+            assertThat(updated.isLocked()).isFalse();
+        }
+
+        @Test
         void shouldChangeUserRole() throws Exception {
             User user = createTestUser("change_me", Role.USER);
 
@@ -160,7 +178,7 @@ class AdminControllerIT extends AbstractMySqlIT {
 
             // WHEN + THEN: Admin tries to lock their own ID
             mockMvc.perform(patch("/admin/users/{id}/lock", admin.getId()))
-                    .andExpect(status().isBadRequest()) // Caught by BusinessException
+                    .andExpect(status().isUnauthorized()) // Caught by BusinessException
                     .andExpect(jsonPath("$.message").value("Security Breach: You cannot lock your own account!"));
 
             // Verify DB state remains unlocked
@@ -232,11 +250,44 @@ class AdminControllerIT extends AbstractMySqlIT {
             User admin = createTestUser("admin_boss", Role.ADMIN);
 
             mockMvc.perform(delete("/admin/users/{id}", admin.getId()))
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message").value("You cannot delete your own account."));
 
             // VERIFY: Admin is still active
             assertThat(userRepository.findById(admin.getId()).get().isDeleted()).isFalse();
+        }
+    }
+
+    /*============================================================
+   3. AUDITING TESTS
+   ============================================================*/
+    @Nested
+
+    @WithMockUser(username = "admin_user", roles = "ADMIN")
+    class AudintingTest {
+        @Test
+        @WithMockUser(username = "admin_user", roles = "ADMIN")
+        void shouldAuditUserRoleChange() {
+            // 1. Create User
+            User user = createTestUser("admin_boss", Role.USER);
+            user = userRepository.save(user); // Revision 1
+
+            // 2. Change Role
+            user.setRole(Role.ADMIN);
+            userRepository.save(user); // Revision 2
+
+            // 3. Verify Audit
+            Revisions<Integer, User> revisions = userRepository.findRevisions(user.getId());
+
+            assertThat(revisions.getContent()).hasSize(2);
+
+            // Check Revision 2
+            Revision<Integer, User> lastRev = revisions.getLatestRevision();
+            assertThat(lastRev.getEntity().getRole()).isEqualTo(Role.ADMIN);
+
+            // Check WHO did it
+            CustomRevisionEntity info = (CustomRevisionEntity) lastRev.getMetadata().getDelegate();
+            assertThat(info.getModifierUser()).isEqualTo("admin_user");
         }
     }
 }

@@ -32,7 +32,7 @@ public class AdminController {
                 .body(userService.addUser(request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build(); // 204 No Content
